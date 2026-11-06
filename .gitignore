@@ -218,3 +218,16 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# ===========================================================================
+# Project-Specific Exclusions (Manufacturing Analytics System)
+# ===========================================================================
+
+# Raw Datasets (Specifically excluded to preserve legitimate audit CSV deliverables)
+data/raw/
+Thales_Group_Manufacturing.csv
+*/Thales_Group_Manufacturing.csv
+
+# VS Code IDE Settings (Keep settings.json)
+.vscode/*
+!.vscode/settings.json
