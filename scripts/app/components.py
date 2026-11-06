@@ -215,29 +215,46 @@ def apply_filters(df: pd.DataFrame, filters: Dict[str, Any]) -> pd.DataFrame:
 
     Parameters:
         df: Source DataFrame.
-        filters: Filter dictionary produced by render_filter_sidebar.
+        filters: Filter dictionary produced by render_filter_sidebar, or custom test dict.
 
     Returns:
         Filtered pandas DataFrame slice.
     """
     filtered = df.copy()
 
-    # Filter Operation Modes
-    selected_modes = filters.get("selected_modes")
-    if selected_modes:
-        filtered = filtered[filtered["Operation_Mode"].isin(selected_modes)]
-    else:
-        # Empty selection returns empty DataFrame
-        return filtered.iloc[0:0]
+    # 1. Filter Operation Modes
+    # Supports 'selected_modes', 'operation_modes', or 'operation_mode'
+    modes = filters.get("selected_modes")
+    if modes is None:
+        modes = filters.get("operation_modes")
+    if modes is None and "operation_mode" in filters:
+        op_val = filters["operation_mode"]
+        modes = [op_val] if isinstance(op_val, str) else op_val
 
-    # Filter Machine IDs
-    selected_machines = filters.get("selected_machines")
-    if selected_machines:
-        filtered = filtered[filtered["Machine_ID"].isin(selected_machines)]
-    else:
-        return filtered.iloc[0:0]
+    if modes is not None:
+        if isinstance(modes, str):
+            modes = [modes]
+        if len(modes) == 0:
+            return filtered.iloc[0:0]
+        filtered = filtered[filtered["Operation_Mode"].isin(modes)]
 
-    # Filter Date Range
+    # 2. Filter Machine IDs
+    # Supports 'selected_machines', 'machine_ids', or 'machine_id'
+    machines = filters.get("selected_machines")
+    if machines is None:
+        machines = filters.get("machine_ids")
+    if machines is None and "machine_id" in filters:
+        m_val = filters["machine_id"]
+        machines = [m_val] if isinstance(m_val, (int, str)) else m_val
+
+    if machines is not None:
+        if isinstance(machines, (int, str)):
+            machines = [machines]
+        if len(machines) == 0:
+            return filtered.iloc[0:0]
+        filtered = filtered[filtered["Machine_ID"].isin(machines)]
+
+    # 3. Filter Date Range
     date_range = filters.get("date_range")
     if date_range and isinstance(date_range, (tuple, list)) and len(date_range) == 2:
         start_date, end_date = date_range

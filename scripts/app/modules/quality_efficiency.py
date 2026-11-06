@@ -1,4 +1,4 @@
-"""
+r"""
 Module 4: Quality Assurance & Efficiency Diagnostics.
 Manufacturing Diagnostic Intelligence System - Phase 2.3.
 
@@ -126,10 +126,10 @@ def render_quality_efficiency(df: pd.DataFrame, kpis: Dict[str, Any]) -> None:
 
     # Architectural Safeguard Notice
     st.info(
-        "**Provisional Safeguard Notice:** The arithmetic complement ($94.991194\%$) is strictly $100 - \\text{mean defect rate}$. "
-        "It must NOT be presented as verified first-pass yield, product conformance, or process capability. "
-        "The recorded Efficiency_Status labels are preserved without reconstruction; exactly two candidate classification "
-        "mismatches exist at $\\text{Error\\_Rate\\_\\%} = 5.0\\%$."
+        r"**Provisional Safeguard Notice:** The arithmetic complement ($94.991194\%$) is strictly $100 - \text{mean defect rate}$. "
+        r"It must NOT be presented as verified first-pass yield, product conformance, or process capability. "
+        r"The recorded Efficiency_Status labels are preserved without reconstruction; exactly two candidate classification "
+        r"mismatches exist at $\text{Error\_Rate\_\%} = 5.0\%$."
     )
 
     # Functional Shell Containers for Phase 2.5 Visual Analytics
