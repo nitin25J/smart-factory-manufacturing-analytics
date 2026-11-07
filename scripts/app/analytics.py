@@ -386,3 +386,353 @@ def compute_machine_health_summary(
         res_df = res_df.sort_values(by="Machine_ID").reset_index(drop=True)
     return res_df
 
+
+# ---------------------------------------------------------------------------
+# 5. Production & Energy Analytics (Module 3)
+# ---------------------------------------------------------------------------
+
+def compute_production_energy_summary(
+    df: pd.DataFrame,
+    machine_col: str = "Machine_ID",
+    speed_col: str = "Production_Speed_units_per_hr",
+    power_col: str = "Power_Consumption_kW",
+) -> pd.DataFrame:
+    """
+    Compute machine-level production speed, power demand, and SEC summary metrics.
+
+    Specific Energy Consumption (SEC) is evaluated strictly at row level for
+    observations where production speed is strictly positive (> 0):
+        SEC = power divided by production speed (kWh/unit)
+
+    Parameters:
+        df: Input DataFrame.
+        machine_col: Column name for machine identifier.
+        speed_col: Column name for production speed (units/hr).
+        power_col: Column name for power consumption (kW).
+
+    Returns:
+        DataFrame containing machine-level throughput, power, and SEC statistics.
+    """
+    expected_cols = [
+        "Machine_ID", "Record_Count", "Mean_Speed_u_per_hr", "Median_Speed_u_per_hr",
+        "Std_Speed_u_per_hr", "Min_Speed_u_per_hr", "Max_Speed_u_per_hr",
+        "Mean_Power_kW", "Median_Power_kW", "Std_Power_kW", "Min_Power_kW",
+        "Max_Power_kW", "Mean_SEC_kWh_per_u", "Median_SEC_kWh_per_u",
+        "Speed_Rank", "Power_Rank", "SEC_Rank"
+    ]
+    if df.empty or machine_col not in df.columns:
+        return pd.DataFrame(columns=expected_cols)
+
+    records = []
+    for m_id, grp in df.groupby(machine_col):
+        n = len(grp)
+        if n == 0:
+            continue
+
+        sp = grp[speed_col].dropna() if speed_col in grp.columns else pd.Series(dtype=float)
+        pw = grp[power_col].dropna() if power_col in grp.columns else pd.Series(dtype=float)
+
+        # SEC row-level calculation with strict positive speed guard
+        if speed_col in grp.columns and power_col in grp.columns:
+            pos_mask = (grp[speed_col] > 0) & (~grp[speed_col].isna()) & (~grp[power_col].isna())
+            if pos_mask.sum() > 0:
+                sec_series = grp.loc[pos_mask, power_col] / grp.loc[pos_mask, speed_col]
+                mean_sec = float(sec_series.mean())
+                med_sec = float(sec_series.median())
+            else:
+                mean_sec = 0.0
+                med_sec = 0.0
+        else:
+            mean_sec = 0.0
+            med_sec = 0.0
+
+        records.append({
+            "Machine_ID": m_id,
+            "Record_Count": n,
+            "Mean_Speed_u_per_hr": float(sp.mean()) if len(sp) > 0 else 0.0,
+            "Median_Speed_u_per_hr": float(sp.median()) if len(sp) > 0 else 0.0,
+            "Std_Speed_u_per_hr": float(sp.std(ddof=1)) if len(sp) > 1 else 0.0,
+            "Min_Speed_u_per_hr": float(sp.min()) if len(sp) > 0 else 0.0,
+            "Max_Speed_u_per_hr": float(sp.max()) if len(sp) > 0 else 0.0,
+            "Mean_Power_kW": float(pw.mean()) if len(pw) > 0 else 0.0,
+            "Median_Power_kW": float(pw.median()) if len(pw) > 0 else 0.0,
+            "Std_Power_kW": float(pw.std(ddof=1)) if len(pw) > 1 else 0.0,
+            "Min_Power_kW": float(pw.min()) if len(pw) > 0 else 0.0,
+            "Max_Power_kW": float(pw.max()) if len(pw) > 0 else 0.0,
+            "Mean_SEC_kWh_per_u": mean_sec,
+            "Median_SEC_kWh_per_u": med_sec,
+        })
+
+    res_df = pd.DataFrame(records)
+    if res_df.empty:
+        return pd.DataFrame(columns=expected_cols)
+
+    # Assign competitive rankings
+    res_df["Speed_Rank"] = res_df["Mean_Speed_u_per_hr"].rank(ascending=False, method="min").astype(int)
+    res_df["Power_Rank"] = res_df["Mean_Power_kW"].rank(ascending=True, method="min").astype(int)
+    res_df["SEC_Rank"] = res_df["Mean_SEC_kWh_per_u"].rank(ascending=True, method="min").astype(int)
+
+    return res_df.sort_values(by="Machine_ID").reset_index(drop=True)
+
+
+def compute_temporal_daily_summary(
+    df: pd.DataFrame,
+    date_col: str = "Date",
+    speed_col: str = "Production_Speed_units_per_hr",
+    power_col: str = "Power_Consumption_kW",
+    defect_col: str = "Quality_Control_Defect_Rate_%",
+    error_col: str = "Error_Rate_%",
+) -> pd.DataFrame:
+    """
+    Compute daily chronological aggregate metrics across all calendar dates.
+
+    Parameters:
+        df: Input DataFrame containing date and metric columns.
+        date_col: Column name containing date strings (DD-MM-YYYY).
+        speed_col: Column name for production speed.
+        power_col: Column name for power consumption.
+        defect_col: Column name for defect rate.
+        error_col: Column name for process error rate.
+
+    Returns:
+        DataFrame sorted chronologically by parsed calendar date.
+    """
+    expected_cols = [
+        "Date", "parsed_date", "Record_Count", "Mean_Speed_u_per_hr",
+        "Mean_Power_kW", "Mean_SEC_kWh_per_u", "Mean_Defect_Rate_pct",
+        "Mean_Error_Rate_pct", "Arithmetic_Complement_pct"
+    ]
+    if df.empty or date_col not in df.columns:
+        return pd.DataFrame(columns=expected_cols)
+
+    records = []
+    for d_val, grp in df.groupby(date_col):
+        n = len(grp)
+        if n == 0:
+            continue
+
+        sp = grp[speed_col].dropna() if speed_col in grp.columns else pd.Series(dtype=float)
+        pw = grp[power_col].dropna() if power_col in grp.columns else pd.Series(dtype=float)
+        dfc = grp[defect_col].dropna() if defect_col in grp.columns else pd.Series(dtype=float)
+        err = grp[error_col].dropna() if error_col in grp.columns else pd.Series(dtype=float)
+
+        # Row-level SEC for positive speed records
+        if speed_col in grp.columns and power_col in grp.columns:
+            pos_mask = (grp[speed_col] > 0) & (~grp[speed_col].isna()) & (~grp[power_col].isna())
+            mean_sec = float((grp.loc[pos_mask, power_col] / grp.loc[pos_mask, speed_col]).mean()) if pos_mask.sum() > 0 else 0.0
+        else:
+            mean_sec = 0.0
+
+        mean_dfc = float(dfc.mean()) if len(dfc) > 0 else 0.0
+        arith_comp = 100.0 - mean_dfc if len(dfc) > 0 else 100.0
+
+        records.append({
+            "Date": str(d_val),
+            "Record_Count": n,
+            "Mean_Speed_u_per_hr": float(sp.mean()) if len(sp) > 0 else 0.0,
+            "Mean_Power_kW": float(pw.mean()) if len(pw) > 0 else 0.0,
+            "Mean_SEC_kWh_per_u": mean_sec,
+            "Mean_Defect_Rate_pct": mean_dfc,
+            "Mean_Error_Rate_pct": float(err.mean()) if len(err) > 0 else 0.0,
+            "Arithmetic_Complement_pct": arith_comp,
+        })
+
+    res_df = pd.DataFrame(records)
+    if res_df.empty:
+        return pd.DataFrame(columns=expected_cols)
+
+    # Parse dates safely to ensure chronological ordering
+    try:
+        res_df["parsed_date"] = pd.to_datetime(res_df["Date"], format="%d-%m-%Y")
+    except Exception:
+        res_df["parsed_date"] = pd.to_datetime(res_df["Date"], errors="coerce")
+
+    return res_df.sort_values(by="parsed_date").reset_index(drop=True)
+
+
+def compute_mode_stratified_summary(
+    df: pd.DataFrame,
+    mode_col: str = "Operation_Mode",
+    speed_col: str = "Production_Speed_units_per_hr",
+    power_col: str = "Power_Consumption_kW",
+    defect_col: str = "Quality_Control_Defect_Rate_%",
+    error_col: str = "Error_Rate_%",
+) -> pd.DataFrame:
+    """
+    Compute operational mode comparisons across production, power, SEC, and quality.
+
+    Parameters:
+        df: Input DataFrame.
+        mode_col: Column name for operation mode.
+        speed_col: Column name for production speed.
+        power_col: Column name for power consumption.
+        defect_col: Column name for defect rate.
+        error_col: Column name for error rate.
+
+    Returns:
+        DataFrame detailing descriptive metrics for each operation mode.
+    """
+    expected_cols = [
+        "Operation_Mode", "Record_Count", "Record_Pct", "Mean_Speed_u_per_hr",
+        "Std_Speed_u_per_hr", "Mean_Power_kW", "Std_Power_kW", "Mean_SEC_kWh_per_u",
+        "Mean_Defect_Rate_pct", "Mean_Error_Rate_pct"
+    ]
+    if df.empty or mode_col not in df.columns:
+        return pd.DataFrame(columns=expected_cols)
+
+    total_n = len(df)
+    records = []
+    # Guarantee canonical mode ordering
+    canonical_modes = ["Active", "Idle", "Maintenance"]
+    present_modes = [m for m in canonical_modes if m in df[mode_col].values]
+    # Add any extra observed modes if present
+    for m in df[mode_col].unique():
+        if m not in present_modes and pd.notna(m):
+            present_modes.append(m)
+
+    for mode in present_modes:
+        grp = df[df[mode_col] == mode]
+        n = len(grp)
+        if n == 0:
+            continue
+
+        sp = grp[speed_col].dropna() if speed_col in grp.columns else pd.Series(dtype=float)
+        pw = grp[power_col].dropna() if power_col in grp.columns else pd.Series(dtype=float)
+        dfc = grp[defect_col].dropna() if defect_col in grp.columns else pd.Series(dtype=float)
+        err = grp[error_col].dropna() if error_col in grp.columns else pd.Series(dtype=float)
+
+        if speed_col in grp.columns and power_col in grp.columns:
+            pos_mask = (grp[speed_col] > 0) & (~grp[speed_col].isna()) & (~grp[power_col].isna())
+            mean_sec = float((grp.loc[pos_mask, power_col] / grp.loc[pos_mask, speed_col]).mean()) if pos_mask.sum() > 0 else 0.0
+        else:
+            mean_sec = 0.0
+
+        records.append({
+            "Operation_Mode": mode,
+            "Record_Count": n,
+            "Record_Pct": float((n / total_n) * 100.0) if total_n > 0 else 0.0,
+            "Mean_Speed_u_per_hr": float(sp.mean()) if len(sp) > 0 else 0.0,
+            "Std_Speed_u_per_hr": float(sp.std(ddof=1)) if len(sp) > 1 else 0.0,
+            "Mean_Power_kW": float(pw.mean()) if len(pw) > 0 else 0.0,
+            "Std_Power_kW": float(pw.std(ddof=1)) if len(pw) > 1 else 0.0,
+            "Mean_SEC_kWh_per_u": mean_sec,
+            "Mean_Defect_Rate_pct": float(dfc.mean()) if len(dfc) > 0 else 0.0,
+            "Mean_Error_Rate_pct": float(err.mean()) if len(err) > 0 else 0.0,
+        })
+
+    return pd.DataFrame(records)
+
+
+# ---------------------------------------------------------------------------
+# 6. Quality & Process Efficiency Analytics (Module 4)
+# ---------------------------------------------------------------------------
+
+def compute_quality_machine_summary(
+    df: pd.DataFrame,
+    machine_col: str = "Machine_ID",
+    defect_col: str = "Quality_Control_Defect_Rate_%",
+    error_col: str = "Error_Rate_%",
+) -> pd.DataFrame:
+    """
+    Compute machine-level finished-good defect rates and process error metrics.
+
+    Parameters:
+        df: Input DataFrame.
+        machine_col: Column name for machine identifier.
+        defect_col: Column name for defect rate (%).
+        error_col: Column name for process error rate (%).
+
+    Returns:
+        DataFrame containing machine quality statistics and rankings.
+    """
+    expected_cols = [
+        "Machine_ID", "Record_Count", "Mean_Defect_Rate_pct", "Median_Defect_Rate_pct",
+        "Std_Defect_Rate_pct", "Min_Defect_Rate_pct", "Max_Defect_Rate_pct",
+        "Arithmetic_Complement_pct", "Mean_Error_Rate_pct", "Median_Error_Rate_pct",
+        "Std_Error_Rate_pct", "Defect_Rank", "Error_Rank"
+    ]
+    if df.empty or machine_col not in df.columns:
+        return pd.DataFrame(columns=expected_cols)
+
+    records = []
+    for m_id, grp in df.groupby(machine_col):
+        n = len(grp)
+        if n == 0:
+            continue
+
+        dfc = grp[defect_col].dropna() if defect_col in grp.columns else pd.Series(dtype=float)
+        err = grp[error_col].dropna() if error_col in grp.columns else pd.Series(dtype=float)
+
+        mean_dfc = float(dfc.mean()) if len(dfc) > 0 else 0.0
+        arith_comp = 100.0 - mean_dfc if len(dfc) > 0 else 100.0
+
+        records.append({
+            "Machine_ID": m_id,
+            "Record_Count": n,
+            "Mean_Defect_Rate_pct": mean_dfc,
+            "Median_Defect_Rate_pct": float(dfc.median()) if len(dfc) > 0 else 0.0,
+            "Std_Defect_Rate_pct": float(dfc.std(ddof=1)) if len(dfc) > 1 else 0.0,
+            "Min_Defect_Rate_pct": float(dfc.min()) if len(dfc) > 0 else 0.0,
+            "Max_Defect_Rate_pct": float(dfc.max()) if len(dfc) > 0 else 0.0,
+            "Arithmetic_Complement_pct": arith_comp,
+            "Mean_Error_Rate_pct": float(err.mean()) if len(err) > 0 else 0.0,
+            "Median_Error_Rate_pct": float(err.median()) if len(err) > 0 else 0.0,
+            "Std_Error_Rate_pct": float(err.std(ddof=1)) if len(err) > 1 else 0.0,
+        })
+
+    res_df = pd.DataFrame(records)
+    if res_df.empty:
+        return pd.DataFrame(columns=expected_cols)
+
+    # Assign competitive rankings (lower defect rate = better rank)
+    res_df["Defect_Rank"] = res_df["Mean_Defect_Rate_pct"].rank(ascending=True, method="min").astype(int)
+    res_df["Error_Rank"] = res_df["Mean_Error_Rate_pct"].rank(ascending=True, method="min").astype(int)
+
+    return res_df.sort_values(by="Machine_ID").reset_index(drop=True)
+
+
+def compute_efficiency_contingency(
+    df: pd.DataFrame,
+    row_col: str = "Operation_Mode",
+    status_col: str = "Efficiency_Status",
+) -> pd.DataFrame:
+    """
+    Compute cross-tabulation of Efficiency_Status tiers across operation modes or machine units.
+
+    Parameters:
+        df: Input DataFrame.
+        row_col: Grouping dimension (default: 'Operation_Mode').
+        status_col: Classification column (default: 'Efficiency_Status').
+
+    Returns:
+        DataFrame cross-tabulation with counts and row percentages.
+    """
+    expected_cols = [
+        row_col, "Total_Count", "Low_Count", "Medium_Count", "High_Count",
+        "Low_Pct", "Medium_Pct", "High_Pct"
+    ]
+    if df.empty or row_col not in df.columns or status_col not in df.columns:
+        return pd.DataFrame(columns=expected_cols)
+
+    ct = pd.crosstab(df[row_col], df[status_col])
+    records = []
+    for r_val in ct.index:
+        low_c = int(ct.loc[r_val, "Low"]) if "Low" in ct.columns else 0
+        med_c = int(ct.loc[r_val, "Medium"]) if "Medium" in ct.columns else 0
+        high_c = int(ct.loc[r_val, "High"]) if "High" in ct.columns else 0
+        total_c = low_c + med_c + high_c
+
+        records.append({
+            row_col: r_val,
+            "Total_Count": total_c,
+            "Low_Count": low_c,
+            "Medium_Count": med_c,
+            "High_Count": high_c,
+            "Low_Pct": (low_c / total_c * 100.0) if total_c > 0 else 0.0,
+            "Medium_Pct": (med_c / total_c * 100.0) if total_c > 0 else 0.0,
+            "High_Pct": (high_c / total_c * 100.0) if total_c > 0 else 0.0,
+        })
+
+    return pd.DataFrame(records)
+
+
