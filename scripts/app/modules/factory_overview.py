@@ -30,7 +30,12 @@ from scripts.app.analytics import (
     compute_machine_network_summary,
     compute_within_machine_jitter,
 )
-from scripts.app.components import render_empty_state, render_kpi_card, render_section_header
+from scripts.app.components import (
+    render_download_button,
+    render_empty_state,
+    render_kpi_card,
+    render_section_header,
+)
 
 
 def render_factory_overview(df: pd.DataFrame, kpis: Dict[str, Any]) -> None:
@@ -173,11 +178,11 @@ def render_factory_overview(df: pd.DataFrame, kpis: Dict[str, Any]) -> None:
                 yaxis_title="Cumulative Probability P(X ≤ x)",
                 yaxis=dict(range=[0.0, 1.02]),
                 xaxis=dict(range=[0.0, 52.0]),
-                margin=dict(l=40, r=20, t=30, b=40),
+                margin=dict(l=40, r=20, t=50, b=40),
                 height=360,
                 legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
             )
-            st.plotly_chart(fig_lat, use_container_width=True)
+            st.plotly_chart(fig_lat, width="stretch")
             st.caption(f"Low-latency observations (≤ 10.0 ms): {low_lat_count:,} ({low_lat_count / n_total * 100:.2f}%). Profile conforms to uniform distribution across [1.0, 50.0] ms.")
 
     with ecdf_col2:
@@ -220,11 +225,11 @@ def render_factory_overview(df: pd.DataFrame, kpis: Dict[str, Any]) -> None:
                 yaxis_title="Cumulative Probability P(X ≤ x)",
                 yaxis=dict(range=[0.0, 1.02]),
                 xaxis=dict(range=[-0.1, 5.2]),
-                margin=dict(l=40, r=20, t=30, b=40),
+                margin=dict(l=40, r=20, t=50, b=40),
                 height=360,
                 legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
             )
-            st.plotly_chart(fig_loss, use_container_width=True)
+            st.plotly_chart(fig_loss, width="stretch")
             st.caption(f"Exact zero loss recorded: {zero_loss_count:,} observations ({zero_loss_count / n_total * 100:.3f}%). 99.993% of records exhibit continuous loss in (0.0, 5.0]%.")
 
     st.divider()
@@ -274,11 +279,11 @@ def render_factory_overview(df: pd.DataFrame, kpis: Dict[str, Any]) -> None:
             )
             fig_jitter.update_layout(
                 yaxis=dict(autorange="reversed"),
-                margin=dict(l=60, r=20, t=20, b=40),
+                margin=dict(l=70, r=20, t=30, b=40),
                 height=max(360, top_n * 20),
                 coloraxis_showscale=False,
             )
-            st.plotly_chart(fig_jitter, use_container_width=True)
+            st.plotly_chart(fig_jitter, width="stretch")
 
             j_min = jitter_df["Jitter_ms"].min()
             j_max = jitter_df["Jitter_ms"].max()
@@ -323,10 +328,10 @@ def render_factory_overview(df: pd.DataFrame, kpis: Dict[str, Any]) -> None:
             fig_mach_scatter.update_layout(
                 xaxis=dict(range=[24.0, 27.5]),
                 yaxis=dict(range=[2.3, 2.7]),
-                margin=dict(l=40, r=20, t=20, b=40),
+                margin=dict(l=50, r=20, t=30, b=40),
                 height=420,
             )
-            st.plotly_chart(fig_mach_scatter, use_container_width=True)
+            st.plotly_chart(fig_mach_scatter, width="stretch")
             st.caption(
                 "Diagnostic Observation: Machine-level means cluster in a tight envelope "
                 "(Latency: 24.93 – 26.49 ms, Packet Loss: 2.43 – 2.56%). No machine exhibits persistent severe connectivity degradation."
@@ -341,7 +346,8 @@ def render_factory_overview(df: pd.DataFrame, kpis: Dict[str, Any]) -> None:
                 "Machine_ID", "Record_Count", "Mean_Latency_ms", "P95_Latency_ms",
                 "Jitter_ms", "Mean_Packet_Loss_pct", "P95_Packet_Loss_pct", "Zero_Loss_Count"
             ]
-            formatted_df = net_summary_df[display_cols].copy()
+            formatted_df = net_summary_df[display_cols].copy().reset_index(drop=True)
+            formatted_df.index.name = None
             st.dataframe(
                 formatted_df.style.format({
                     "Mean_Latency_ms": "{:.2f} ms",
@@ -352,8 +358,16 @@ def render_factory_overview(df: pd.DataFrame, kpis: Dict[str, Any]) -> None:
                     "Record_Count": "{:,}",
                     "Zero_Loss_Count": "{:,}",
                 }),
-                use_container_width=True,
+                width="stretch",
                 height=320,
+                hide_index=True,
+            )
+            render_download_button(
+                df=formatted_df,
+                filename="module1_machine_qos_summary.csv",
+                label="📥 Export Machine QoS Summary (CSV)",
+                key="download_mod1_qos",
+                help_text="Download machine-level network QoS metrics as CSV."
             )
         else:
             render_empty_state("No Data Table", "Current filter parameters yielded zero machine records.")

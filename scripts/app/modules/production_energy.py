@@ -30,19 +30,24 @@ from scripts.app.analytics import (
     compute_production_energy_summary,
     compute_temporal_daily_summary,
 )
-from scripts.app.components import render_empty_state, render_kpi_card, render_section_header
+from scripts.app.components import (
+    render_download_button,
+    render_empty_state,
+    render_kpi_card,
+    render_section_header,
+)
 
 
 def render_production_energy(df: pd.DataFrame, kpis: Dict[str, Any]) -> None:
     """
-    Render Module 3: Production Throughput & Energy Performance analytical interface.
+    Render Module 3: Production Throughput & Energy Monitoring analytical interface.
 
     Parameters:
         df: Filtered or full DataFrame slice for throughput and energy monitoring.
         kpis: Pre-calculated KPI dictionary from kpi_engine.
     """
     render_section_header(
-        title="Module 3: Production Throughput & Energy Performance",
+        title="Module 3: Production Throughput & Energy Monitoring",
         description="Fleet throughput rates, operational mode allocations, power demand, and specific energy consumption (SEC) baselines.",
     )
 
@@ -165,11 +170,11 @@ def render_production_energy(df: pd.DataFrame, kpis: Dict[str, Any]) -> None:
             fig_sp_hist.update_layout(
                 xaxis_title="Production Speed (units/hr)",
                 yaxis_title="Observation Count",
-                margin=dict(l=40, r=20, t=30, b=40),
+                margin=dict(l=40, r=20, t=50, b=40),
                 height=340,
                 legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
             )
-            st.plotly_chart(fig_sp_hist, use_container_width=True)
+            st.plotly_chart(fig_sp_hist, width="stretch")
             st.caption(
                 f"Fleet speed spans **[{df['Production_Speed_units_per_hr'].min():.1f}, {df['Production_Speed_units_per_hr'].max():.1f}] units/hr** "
                 f"with empirical mean **{mean_speed_val:.2f} units/hr** and standard deviation **{df['Production_Speed_units_per_hr'].std(ddof=1):.2f} units/hr**. "
@@ -200,7 +205,7 @@ def render_production_energy(df: pd.DataFrame, kpis: Dict[str, Any]) -> None:
                 margin=dict(l=40, r=20, t=40, b=40),
                 height=340,
             )
-            st.plotly_chart(fig_sp_trend, use_container_width=True)
+            st.plotly_chart(fig_sp_trend, width="stretch")
             st.caption(
                 f"Evaluated across **{len(temporal_summary)} calendar dates**. Daily mean speed exhibits tight stability "
                 f"around the fleet baseline (daily range: **{temporal_summary['Mean_Speed_u_per_hr'].min():.1f}** to "
@@ -244,11 +249,11 @@ def render_production_energy(df: pd.DataFrame, kpis: Dict[str, Any]) -> None:
             fig_sp_mach.update_layout(
                 xaxis_title="Mean Production Speed (units/hr)",
                 yaxis=dict(autorange="reversed"),
-                margin=dict(l=60, r=20, t=20, b=40),
+                margin=dict(l=60, r=20, t=30, b=40),
                 height=max(320, len(display_df) * 18),
                 coloraxis_showscale=False,
             )
-            st.plotly_chart(fig_sp_mach, use_container_width=True)
+            st.plotly_chart(fig_sp_mach, width="stretch")
             st.caption(
                 f"Top-performing unit: **Machine {sorted_mach_speed.iloc[-1 if ascending else 0]['Machine_ID']}** "
                 f"({sorted_mach_speed.iloc[-1 if ascending else 0]['Mean_Speed_u_per_hr']:.2f} u/hr); "
@@ -271,11 +276,11 @@ def render_production_energy(df: pd.DataFrame, kpis: Dict[str, Any]) -> None:
             fig_sp_mode.update_layout(
                 xaxis_title="Operation Mode",
                 yaxis_title="Production Speed (units/hr)",
-                margin=dict(l=40, r=20, t=20, b=40),
+                margin=dict(l=40, r=20, t=30, b=40),
                 height=320,
                 showlegend=False,
             )
-            st.plotly_chart(fig_sp_mode, use_container_width=True)
+            st.plotly_chart(fig_sp_mode, width="stretch")
 
             if not mode_summary.empty:
                 st.dataframe(
@@ -286,7 +291,7 @@ def render_production_energy(df: pd.DataFrame, kpis: Dict[str, Any]) -> None:
                         "Mean_Speed_u_per_hr": "Mean Speed (u/hr)",
                         "Std_Speed_u_per_hr": "Speed Std (u/hr)"
                     }),
-                    use_container_width=True,
+                    width="stretch",
                     hide_index=True
                 )
             st.caption(
@@ -334,11 +339,11 @@ def render_production_energy(df: pd.DataFrame, kpis: Dict[str, Any]) -> None:
             fig_pw_hist.update_layout(
                 xaxis_title="Power Consumption (kW)",
                 yaxis_title="Observation Count",
-                margin=dict(l=40, r=20, t=30, b=40),
+                margin=dict(l=40, r=20, t=50, b=40),
                 height=340,
                 legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
             )
-            st.plotly_chart(fig_pw_hist, use_container_width=True)
+            st.plotly_chart(fig_pw_hist, width="stretch")
             st.caption(
                 f"Fleet power consumption spans **[{df['Power_Consumption_kW'].min():.2f}, {df['Power_Consumption_kW'].max():.2f}] kW** "
                 f"with mean **{power_mean:.2f} kW** (std: **{power_series.std(ddof=1):.2f} kW**). "
@@ -370,7 +375,7 @@ def render_production_energy(df: pd.DataFrame, kpis: Dict[str, Any]) -> None:
                 margin=dict(l=40, r=20, t=40, b=40),
                 height=340,
             )
-            st.plotly_chart(fig_pw_trend, use_container_width=True)
+            st.plotly_chart(fig_pw_trend, width="stretch")
             st.caption(
                 f"Longitudinal daily power draw remains tightly clustered between **{temporal_summary['Mean_Power_kW'].min():.2f} kW** "
                 f"and **{temporal_summary['Mean_Power_kW'].max():.2f} kW** across all 69 monitoring dates."
@@ -412,11 +417,11 @@ def render_production_energy(df: pd.DataFrame, kpis: Dict[str, Any]) -> None:
             fig_pw_mach.update_layout(
                 xaxis_title="Mean Electrical Power Demand (kW)",
                 yaxis=dict(autorange="reversed"),
-                margin=dict(l=60, r=20, t=20, b=40),
+                margin=dict(l=60, r=20, t=30, b=40),
                 height=max(320, len(display_p_df) * 18),
                 coloraxis_showscale=False,
             )
-            st.plotly_chart(fig_pw_mach, use_container_width=True)
+            st.plotly_chart(fig_pw_mach, width="stretch")
             st.caption(
                 f"Lowest mean power draw: **Machine {sorted_mach_power.iloc[0 if p_ascending else -1]['Machine_ID']}** "
                 f"({sorted_mach_power.iloc[0 if p_ascending else -1]['Mean_Power_kW']:.2f} kW); "
@@ -438,11 +443,11 @@ def render_production_energy(df: pd.DataFrame, kpis: Dict[str, Any]) -> None:
             fig_pw_mode.update_layout(
                 xaxis_title="Operation Mode",
                 yaxis_title="Power Consumption (kW)",
-                margin=dict(l=40, r=20, t=20, b=40),
+                margin=dict(l=40, r=20, t=30, b=40),
                 height=320,
                 showlegend=False,
             )
-            st.plotly_chart(fig_pw_mode, use_container_width=True)
+            st.plotly_chart(fig_pw_mode, width="stretch")
 
             if not mode_summary.empty:
                 st.dataframe(
@@ -452,7 +457,7 @@ def render_production_energy(df: pd.DataFrame, kpis: Dict[str, Any]) -> None:
                         "Mean_Power_kW": "Mean Power (kW)",
                         "Std_Power_kW": "Power Std (kW)"
                     }),
-                    use_container_width=True,
+                    width="stretch",
                     hide_index=True
                 )
             st.caption(
@@ -511,7 +516,7 @@ def render_production_energy(df: pd.DataFrame, kpis: Dict[str, Any]) -> None:
                     line_dash="dash",
                     line_color="#2ca02c",
                     annotation_text=f"Median: {p50_sec:.4f} kWh/u",
-                    annotation_position="top right",
+                    annotation_position="top left",
                 )
                 fig_sec_hist.add_vline(
                     x=p95_sec,
@@ -523,11 +528,11 @@ def render_production_energy(df: pd.DataFrame, kpis: Dict[str, Any]) -> None:
                 fig_sec_hist.update_layout(
                     xaxis_title="Specific Energy Consumption (kWh/unit)",
                     yaxis_title="Observation Count",
-                    margin=dict(l=40, r=20, t=30, b=40),
+                    margin=dict(l=40, r=20, t=50, b=40),
                     height=340,
                     legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
                 )
-                st.plotly_chart(fig_sec_hist, use_container_width=True)
+                st.plotly_chart(fig_sec_hist, width="stretch")
                 st.caption(
                     f"Evaluated on **{eligible_count:,} eligible observations** (strictly speed > 0; **{excluded_count} excluded**). "
                     f"Mean SEC is **{sec_series.mean():.4f} kWh/unit** (Median: **{p50_sec:.4f}**, P95: **{p95_sec:.4f}**, "
@@ -544,7 +549,7 @@ def render_production_energy(df: pd.DataFrame, kpis: Dict[str, Any]) -> None:
             decimation_option = st.selectbox(
                 "Display Sample Size:",
                 options=[1000, 2500, 5000, 10000, "All Records"],
-                index=1,
+                index=2,
                 help="Decimate scatter plot points to preserve smooth browser rendering.",
                 key="prod_bivar_decimate"
             )
@@ -586,11 +591,11 @@ def render_production_energy(df: pd.DataFrame, kpis: Dict[str, Any]) -> None:
         fig_bivar.update_layout(
             xaxis_title="Production Speed (units/hr)",
             yaxis_title="Power Consumption (kW)",
-            margin=dict(l=40, r=20, t=20, b=40),
+            margin=dict(l=40, r=20, t=30, b=40),
             height=380,
             legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
         )
-        st.plotly_chart(fig_bivar, use_container_width=True)
+        st.plotly_chart(fig_bivar, width="stretch")
 
         corr_val = df[["Production_Speed_units_per_hr", "Power_Consumption_kW"]].dropna().corr().iloc[0, 1] if len(df) > 1 else 0.0
         sample_note = f" (Displaying random sample of {len(scatter_df):,} records)" if is_sampled else ""
@@ -635,11 +640,11 @@ def render_production_energy(df: pd.DataFrame, kpis: Dict[str, Any]) -> None:
             fig_sec_mach.update_layout(
                 xaxis_title="Specific Energy Consumption (kWh/unit)",
                 yaxis=dict(autorange="reversed"),
-                margin=dict(l=60, r=20, t=20, b=40),
+                margin=dict(l=60, r=20, t=30, b=40),
                 height=max(320, len(display_sec_df) * 18),
                 coloraxis_showscale=False,
             )
-            st.plotly_chart(fig_sec_mach, use_container_width=True)
+            st.plotly_chart(fig_sec_mach, width="stretch")
             st.caption(
                 f"Most energy-efficient machine: **Machine {sorted_mach_sec.iloc[0 if sec_ascending else -1]['Machine_ID']}** "
                 f"({sorted_mach_sec.iloc[0 if sec_ascending else -1]['Mean_SEC_kWh_per_u']:.4f} kWh/u); "
@@ -663,8 +668,22 @@ def render_production_energy(df: pd.DataFrame, kpis: Dict[str, Any]) -> None:
                 "Power_Rank": "Power Rank",
                 "SEC_Rank": "SEC Rank",
             })
+            display_fleet_cols = [
+                "Machine", "Records", "Speed Mean (u/hr)", "Speed Med (u/hr)",
+                "Power Mean (kW)", "Power Med (kW)", "SEC Mean (kWh/u)",
+                "Speed Rank", "Power Rank", "SEC Rank"
+            ]
+            export_fleet_df = fmt_table[display_fleet_cols].copy().reset_index(drop=True)
+            export_fleet_df.index.name = None
             st.dataframe(
-                fmt_table[["Machine", "Records", "Speed Mean (u/hr)", "Speed Med (u/hr)", "Power Mean (kW)", "Power Med (kW)", "SEC Mean (kWh/u)", "Speed Rank", "Power Rank", "SEC Rank"]],
-                use_container_width=True,
+                export_fleet_df,
+                width="stretch",
                 hide_index=True
+            )
+            render_download_button(
+                df=export_fleet_df,
+                filename="module3_fleet_production_energy_summary.csv",
+                label="📥 Export Fleet Production & Energy Summary (CSV)",
+                key="download_mod3_fleet",
+                help_text="Download machine fleet production speeds, power demand, SEC intensity, and rankings as CSV."
             )

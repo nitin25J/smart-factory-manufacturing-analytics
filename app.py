@@ -124,6 +124,60 @@ def main() -> None:
         initial_sidebar_state="expanded",
     )
 
+    # Visual Theme Refinements (Dark Graphite, Soft Ivory, Anti-Truncation Spacing)
+    st.markdown(
+        """
+        <style>
+        /* Header typography refinement */
+        h1 {
+            font-size: 2.15rem !important;
+            font-weight: 700 !important;
+            color: #F8FAFC !important;
+            letter-spacing: -0.02em !important;
+            line-height: 1.25 !important;
+            margin-bottom: 0.15rem !important;
+        }
+        /* Subtitle typography */
+        [data-testid="stCaptionContainer"] p {
+            font-size: 0.92rem !important;
+            color: #94A3B8 !important;
+            line-height: 1.4 !important;
+        }
+        /* Metric card styling: prevent label/value truncation across all column layouts */
+        [data-testid="stMetric"] {
+            background-color: rgba(30, 41, 59, 0.45);
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            border-radius: 8px;
+            padding: 0.65rem 0.85rem;
+            margin-bottom: 0.5rem;
+        }
+        [data-testid="stMetricValue"] {
+            font-size: 1.55rem !important;
+            font-weight: 600 !important;
+            color: #F1F5F9 !important;
+            white-space: normal !important;
+            word-break: break-word !important;
+            line-height: 1.2 !important;
+        }
+        [data-testid="stMetricLabel"] {
+            font-size: 0.82rem !important;
+            color: #94A3B8 !important;
+            font-weight: 500 !important;
+            white-space: normal !important;
+            word-break: break-word !important;
+            line-height: 1.2 !important;
+        }
+        /* Compact safeguard notices */
+        .stAlert {
+            padding: 0.65rem 0.85rem !important;
+            border-radius: 6px !important;
+            font-size: 0.88rem !important;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
     # Application Header
     st.title("🏭 Manufacturing Diagnostic Intelligence System")
     st.caption(

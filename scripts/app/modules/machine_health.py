@@ -27,7 +27,12 @@ from scripts.app.analytics import (
     compute_machine_health_summary,
     compute_mahalanobis_distances,
 )
-from scripts.app.components import render_empty_state, render_kpi_card, render_section_header
+from scripts.app.components import (
+    render_download_button,
+    render_empty_state,
+    render_kpi_card,
+    render_section_header,
+)
 
 
 def render_machine_health(df: pd.DataFrame, kpis: Dict[str, Any]) -> None:
@@ -130,7 +135,7 @@ def render_machine_health(df: pd.DataFrame, kpis: Dict[str, Any]) -> None:
         max_scatter_pts = st.select_slider(
             "Interactive Display Sample Size:",
             options=[1000, 2500, 5000, 10000, "All Records"],
-            value=5000 if n_total > 5000 else "All Records",
+            value=5000 if n_total >= 5000 else "All Records",
             key="mod2_scatter_samples",
             help="Select maximum points for interactive WebGL rendering. Summary statistics always evaluate 100% of data."
         )
@@ -185,10 +190,10 @@ def render_machine_health(df: pd.DataFrame, kpis: Dict[str, Any]) -> None:
     fig_bivar.update_layout(
         xaxis=dict(range=[25.0, 95.0], title="Core Temperature (°C)"),
         yaxis=dict(range=[0.0, 5.5], title="Vibration Frequency (Hz)"),
-        margin=dict(l=40, r=20, t=20, b=40),
+        margin=dict(l=40, r=20, t=30, b=40),
         height=450,
     )
-    st.plotly_chart(fig_bivar, use_container_width=True)
+    st.plotly_chart(fig_bivar, width="stretch")
 
     st.divider()
 
@@ -250,11 +255,11 @@ def render_machine_health(df: pd.DataFrame, kpis: Dict[str, Any]) -> None:
             fig_pm_hist.update_layout(
                 xaxis=dict(range=[0.0, 1.0], title="Predictive Maintenance Score [0.0, 1.0]"),
                 yaxis_title="Observation Count",
-                margin=dict(l=40, r=20, t=20, b=40),
+                margin=dict(l=40, r=20, t=50, b=40),
                 height=320,
                 legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
             )
-            st.plotly_chart(fig_pm_hist, use_container_width=True)
+            st.plotly_chart(fig_pm_hist, width="stretch")
             st.caption(
                 f"Empirical mean score: **{pm_stats.get('mean', 0.50):.4f}** (std: **{pm_stats.get('std_dev', 0.29):.4f}**). "
                 "The distribution is continuous and uniform across [0.0, 1.0] without modal spikes."
@@ -324,10 +329,10 @@ def render_machine_health(df: pd.DataFrame, kpis: Dict[str, Any]) -> None:
         fig_mah.update_layout(
             xaxis_title="Mahalanobis Distance D",
             yaxis_title="Observation Frequency",
-            margin=dict(l=40, r=20, t=30, b=40),
+            margin=dict(l=40, r=20, t=50, b=40),
             height=300,
         )
-        st.plotly_chart(fig_mah, use_container_width=True)
+        st.plotly_chart(fig_mah, width="stretch")
         st.info(
             f"**Diagnostic Screening Finding:** Maximum observed Mahalanobis distance is **{mah_results.get('max_distance', 0.0):.2f}**, "
             f"which remains strictly below the theoretical 99.9% critical fence of **{mah_results.get('threshold', 3.72):.2f}**. "
@@ -368,11 +373,11 @@ def render_machine_health(df: pd.DataFrame, kpis: Dict[str, Any]) -> None:
             )
             fig_temp_bar.update_layout(
                 yaxis=dict(range=[55.0, 65.0], title="Mean Core Temperature (°C)"),
-                margin=dict(l=40, r=20, t=20, b=60),
+                margin=dict(l=60, r=20, t=30, b=60),
                 height=380,
                 coloraxis_showscale=False,
             )
-            st.plotly_chart(fig_temp_bar, use_container_width=True)
+            st.plotly_chart(fig_temp_bar, width="stretch")
             st.caption("Fleet machine mean temperatures range narrowly between 59.3 °C and 60.7 °C, demonstrating thermal balance across the production floor.")
         else:
             render_empty_state("No Temperature Data", "Insufficient data to compute machine temperature comparisons.")
@@ -393,11 +398,11 @@ def render_machine_health(df: pd.DataFrame, kpis: Dict[str, Any]) -> None:
             )
             fig_vib_bar.update_layout(
                 yaxis=dict(range=[2.3, 2.8], title="Mean Vibration (Hz)"),
-                margin=dict(l=40, r=20, t=20, b=60),
+                margin=dict(l=60, r=20, t=30, b=60),
                 height=380,
                 coloraxis_showscale=False,
             )
-            st.plotly_chart(fig_vib_bar, use_container_width=True)
+            st.plotly_chart(fig_vib_bar, width="stretch")
             st.caption("Fleet machine mean vibrations range between 2.48 Hz and 2.61 Hz, with zero machines exhibiting resonant frequency excursions.")
         else:
             render_empty_state("No Vibration Data", "Insufficient data to compute machine vibration comparisons.")
@@ -418,11 +423,11 @@ def render_machine_health(df: pd.DataFrame, kpis: Dict[str, Any]) -> None:
             )
             fig_pm_bar.update_layout(
                 yaxis=dict(range=[0.45, 0.55], title="Mean Predictive Maintenance Score"),
-                margin=dict(l=40, r=20, t=20, b=60),
+                margin=dict(l=60, r=20, t=30, b=60),
                 height=380,
                 coloraxis_showscale=False,
             )
-            st.plotly_chart(fig_pm_bar, use_container_width=True)
+            st.plotly_chart(fig_pm_bar, width="stretch")
             st.caption(f"Sorted by highest provisional priority ({'Descending: Higher score = Higher risk' if is_high_risk else 'Ascending: Lower score = Higher risk'}). Machine means remain uniform near ~0.50.")
         else:
             render_empty_state("No Score Data", "Insufficient data to compute machine score comparisons.")
@@ -430,8 +435,15 @@ def render_machine_health(df: pd.DataFrame, kpis: Dict[str, Any]) -> None:
     with tab_table:
         st.markdown("##### Machine Mechanical Telemetry Table")
         if not health_summary_df.empty:
+            display_cols = [
+                "Machine_ID", "Record_Count", "Mean_Temperature_C", "Median_Temperature_C",
+                "Mean_Vibration_Hz", "Median_Vibration_Hz", "Mean_PM_Score", "Median_PM_Score",
+                "Max_Mahalanobis_D"
+            ]
+            export_health_df = health_summary_df[display_cols].copy().reset_index(drop=True)
+            export_health_df.index.name = None
             st.dataframe(
-                health_summary_df.style.format({
+                export_health_df.style.format({
                     "Record_Count": "{:,}",
                     "Mean_Temperature_C": "{:.2f} °C",
                     "Median_Temperature_C": "{:.2f} °C",
@@ -441,8 +453,16 @@ def render_machine_health(df: pd.DataFrame, kpis: Dict[str, Any]) -> None:
                     "Median_PM_Score": "{:.4f}",
                     "Max_Mahalanobis_D": "{:.2f}",
                 }),
-                use_container_width=True,
+                width="stretch",
                 height=320,
+                hide_index=True,
+            )
+            render_download_button(
+                df=export_health_df,
+                filename="module2_machine_health_summary.csv",
+                label="📥 Export Machine Health Summary (CSV)",
+                key="mod2_download_health",
+                help_text="Download machine mechanical condition metrics as CSV."
             )
         else:
             render_empty_state("No Data Table", "Current filter parameters yielded zero machine records.")

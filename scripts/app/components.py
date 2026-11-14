@@ -22,6 +22,7 @@ from __future__ import annotations
 import datetime
 from typing import Any, Dict, List, Optional, Tuple, Union
 
+import numpy as np
 import pandas as pd
 import streamlit as st
 
@@ -58,7 +59,7 @@ def render_kpi_card(
     label: str,
     value: Union[int, float, str],
     unit: str = "",
-    delta: Optional[str] = None,
+    delta: Optional[Union[str, int, float]] = None,
     subtext: Optional[str] = None,
     help_text: Optional[str] = None
 ) -> None:
@@ -69,11 +70,13 @@ def render_kpi_card(
         label: Descriptive metric label.
         value: Numeric or formatted string value.
         unit: Measurement unit (e.g., '°C', 'Hz', 'units/hr', 'ms', '%', 'kWh/unit').
-        delta: Optional change or status indicator string.
+        delta: Optional change or status indicator string or number.
         subtext: Optional explanatory footnote or caveat.
         help_text: Tooltip help text for metric definition.
     """
-    if isinstance(value, float):
+    if isinstance(value, (int, np.integer)):
+        formatted_val = f"{int(value):,}"
+    elif isinstance(value, float):
         # Format floating-point values cleanly
         if abs(value) >= 1000:
             formatted_val = f"{value:,.2f}"
@@ -81,8 +84,6 @@ def render_kpi_card(
             formatted_val = f"{value:.4f}"
         else:
             formatted_val = f"{value:.6f}"
-    elif isinstance(value, int):
-        formatted_val = f"{value:,}"
     else:
         formatted_val = str(value)
 
@@ -96,6 +97,81 @@ def render_kpi_card(
     )
     if subtext:
         st.caption(subtext)
+
+
+# ---------------------------------------------------------------------------
+# Tabular Data Export Components
+# ---------------------------------------------------------------------------
+
+def render_download_button(
+    df: Union[pd.DataFrame, Any],
+    filename: str,
+    label: str = "📥 Download Data (CSV)",
+    key: Optional[str] = None,
+    help_text: Optional[str] = "Export table data to a CSV file."
+) -> None:
+    """
+    Render a standardized CSV download button for tabular data.
+    Ensures that only genuine business columns are exported, with zero accidental
+    DataFrame index columns, unnamed columns ('Unnamed: 0'), or whitespace column headers.
+
+    Parameters:
+        df: DataFrame or Styler to export.
+        filename: Destination filename (e.g. 'module1_machine_qos_summary.csv').
+        label: UI label for the download button.
+        key: Unique Streamlit widget key.
+        help_text: Tooltip help text.
+    """
+    if df is None:
+        return
+
+    # Extract underlying DataFrame if a pandas Styler object is passed
+    if hasattr(df, "data") and isinstance(df.data, pd.DataFrame):
+        export_df = df.data.copy()
+    elif isinstance(df, pd.DataFrame):
+        export_df = df.copy()
+    else:
+        try:
+            export_df = pd.DataFrame(df).copy()
+        except Exception:
+            return
+
+    if export_df.empty:
+        return
+
+    # Proactively strip any accidental unnamed or index columns
+    cols_to_drop = []
+    for col in export_df.columns:
+        col_name = str(col).strip()
+        # Pattern match any 'Unnamed:', empty, or whitespace header
+        if col_name.startswith("Unnamed:") or col_name == "" or col_name.lower().startswith("unnamed"):
+            cols_to_drop.append(col)
+        # Drop auto-generated integer index columns (e.g. from an un-dropped reset_index)
+        elif col_name.lower() in ("index", "level_0") and (
+            pd.api.types.is_integer_dtype(export_df[col])
+            and len(export_df) > 0
+            and (export_df[col].iloc[0] == 0)
+        ):
+            cols_to_drop.append(col)
+
+    if cols_to_drop:
+        export_df = export_df.drop(columns=cols_to_drop)
+
+    # Reset index without naming to prevent index leakage
+    export_df = export_df.reset_index(drop=True)
+    export_df.index.name = None
+
+    # Deterministic UTF-8 CSV serialization strictly excluding pandas index
+    csv_bytes = export_df.to_csv(index=False, lineterminator="\n").encode("utf-8")
+
+    st.download_button(
+        label=label,
+        data=csv_bytes,
+        file_name=filename,
+        mime="text/csv",
+        key=key,
+        help=help_text,
+    )
 
 
 # ---------------------------------------------------------------------------
