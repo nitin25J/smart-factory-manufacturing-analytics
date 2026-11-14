@@ -31,19 +31,24 @@ from scripts.app.analytics import (
     compute_quality_machine_summary,
     compute_temporal_daily_summary,
 )
-from scripts.app.components import render_empty_state, render_kpi_card, render_section_header
+from scripts.app.components import (
+    render_download_button,
+    render_empty_state,
+    render_kpi_card,
+    render_section_header,
+)
 
 
 def render_quality_efficiency(df: pd.DataFrame, kpis: Dict[str, Any]) -> None:
     """
-    Render Module 4: Quality Assurance & Process Efficiency Diagnostics interface.
+    Render Module 4: Quality Assurance & Efficiency Diagnostics interface.
 
     Parameters:
         df: Filtered or full DataFrame slice for quality and efficiency diagnostics.
         kpis: Pre-calculated KPI dictionary from kpi_engine.
     """
     render_section_header(
-        title="Module 4: Quality Assurance & Process Efficiency Diagnostics",
+        title="Module 4: Quality Assurance & Efficiency Diagnostics",
         description="Finished-good defect surveillance, process execution errors, specific energy consumption (SEC), and multi-tier efficiency ratings.",
     )
 
@@ -177,11 +182,11 @@ def render_quality_efficiency(df: pd.DataFrame, kpis: Dict[str, Any]) -> None:
                 fig_dfc_hist.update_layout(
                     xaxis_title="Defect Rate (%)",
                     yaxis_title="Observation Count",
-                    margin=dict(l=40, r=20, t=30, b=40),
+                    margin=dict(l=40, r=20, t=50, b=40),
                     height=300,
                     legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
                 )
-                st.plotly_chart(fig_dfc_hist, use_container_width=True)
+                st.plotly_chart(fig_dfc_hist, width="stretch")
                 st.caption(
                     f"Defect rate spans **[{df['Quality_Control_Defect_Rate_%'].min():.2f}, {df['Quality_Control_Defect_Rate_%'].max():.2f}]%** "
                     f"with mean **{mean_defect:.4f}%** and standard deviation **{df['Quality_Control_Defect_Rate_%'].std(ddof=1):.2f}%**."
@@ -210,11 +215,11 @@ def render_quality_efficiency(df: pd.DataFrame, kpis: Dict[str, Any]) -> None:
                 fig_err_hist.update_layout(
                     xaxis_title="Process Error Rate (%)",
                     yaxis_title="Observation Count",
-                    margin=dict(l=40, r=20, t=30, b=40),
+                    margin=dict(l=40, r=20, t=50, b=40),
                     height=300,
                     legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
                 )
-                st.plotly_chart(fig_err_hist, use_container_width=True)
+                st.plotly_chart(fig_err_hist, width="stretch")
                 st.caption(
                     f"Process error rate spans **[{df['Error_Rate_%'].min():.2f}, {df['Error_Rate_%'].max():.2f}]%** "
                     f"with mean **{mean_error:.4f}%** and standard deviation **{df['Error_Rate_%'].std(ddof=1):.2f}%**."
@@ -257,11 +262,11 @@ def render_quality_efficiency(df: pd.DataFrame, kpis: Dict[str, Any]) -> None:
             fig_q_trend.update_layout(
                 xaxis_title="Calendar Date",
                 yaxis_title="Rate (%)",
-                margin=dict(l=40, r=20, t=30, b=40),
+                margin=dict(l=40, r=20, t=40, b=40),
                 height=340,
                 legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
             )
-            st.plotly_chart(fig_q_trend, use_container_width=True)
+            st.plotly_chart(fig_q_trend, width="stretch")
             st.caption(
                 f"Both quality indicators show extreme daily baseline consistency across all {len(temporal_summary)} dates "
                 f"(Daily mean defect range: **{temporal_summary['Mean_Defect_Rate_pct'].min():.2f}%** to **{temporal_summary['Mean_Defect_Rate_pct'].max():.2f}%**; "
@@ -277,7 +282,7 @@ def render_quality_efficiency(df: pd.DataFrame, kpis: Dict[str, Any]) -> None:
             q_decimation = st.selectbox(
                 "Display Sample Size:",
                 options=[1000, 2500, 5000, 10000, "All Records"],
-                index=1,
+                index=2,
                 key="qual_bivar_decimate"
             )
         with c_qb2:
@@ -316,11 +321,11 @@ def render_quality_efficiency(df: pd.DataFrame, kpis: Dict[str, Any]) -> None:
         fig_q_bivar.update_layout(
             xaxis_title="Defect Rate (%)",
             yaxis_title="Process Error Rate (%)",
-            margin=dict(l=40, r=20, t=20, b=40),
+            margin=dict(l=40, r=20, t=30, b=40),
             height=380,
             legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
         )
-        st.plotly_chart(fig_q_bivar, use_container_width=True)
+        st.plotly_chart(fig_q_bivar, width="stretch")
 
         corr_qe = df[["Quality_Control_Defect_Rate_%", "Error_Rate_%"]].dropna().corr().iloc[0, 1] if len(df) > 1 else 0.0
         sample_sub = f" (Sample: {len(q_scatter_df):,} records)" if q_is_sampled else ""
@@ -343,11 +348,11 @@ def render_quality_efficiency(df: pd.DataFrame, kpis: Dict[str, Any]) -> None:
             fig_q_mode.update_layout(
                 xaxis_title="Operation Mode",
                 yaxis_title="Defect Rate (%)",
-                margin=dict(l=40, r=20, t=20, b=40),
+                margin=dict(l=40, r=20, t=30, b=40),
                 height=320,
                 showlegend=False,
             )
-            st.plotly_chart(fig_q_mode, use_container_width=True)
+            st.plotly_chart(fig_q_mode, width="stretch")
 
             if not mode_summary.empty:
                 st.dataframe(
@@ -358,7 +363,7 @@ def render_quality_efficiency(df: pd.DataFrame, kpis: Dict[str, Any]) -> None:
                         "Mean_Defect_Rate_pct": "Mean Defect Rate (%)",
                         "Mean_Error_Rate_pct": "Mean Error Rate (%)"
                     }),
-                    use_container_width=True,
+                    width="stretch",
                     hide_index=True
                 )
             st.caption(
@@ -408,11 +413,11 @@ def render_quality_efficiency(df: pd.DataFrame, kpis: Dict[str, Any]) -> None:
         fig_qm_bar.update_layout(
             xaxis_title="Mean Defect Rate (%)",
             yaxis=dict(autorange="reversed"),
-            margin=dict(l=60, r=20, t=20, b=40),
+            margin=dict(l=60, r=20, t=30, b=40),
             height=max(320, len(display_qm_df) * 18),
             coloraxis_showscale=False,
         )
-        st.plotly_chart(fig_qm_bar, use_container_width=True)
+        st.plotly_chart(fig_qm_bar, width="stretch")
         st.caption(
             f"Lowest observed defect rate: **Machine {sorted_mach_q.iloc[0 if q_asc else -1]['Machine_ID']}** "
             f"({sorted_mach_q.iloc[0 if q_asc else -1]['Mean_Defect_Rate_pct']:.4f}%); "
@@ -433,10 +438,24 @@ def render_quality_efficiency(df: pd.DataFrame, kpis: Dict[str, Any]) -> None:
                 "Defect_Rank": "Defect Rank",
                 "Error_Rank": "Error Rank",
             })
+            display_q_cols = [
+                "Machine", "Observations", "Defect Mean (%)", "Defect Med (%)",
+                "Complement (%)", "Error Mean (%)", "Error Med (%)",
+                "Defect Rank", "Error Rank"
+            ]
+            export_q_df = fmt_q_table[display_q_cols].copy().reset_index(drop=True)
+            export_q_df.index.name = None
             st.dataframe(
-                fmt_q_table[["Machine", "Observations", "Defect Mean (%)", "Defect Med (%)", "Complement (%)", "Error Mean (%)", "Error Med (%)", "Defect Rank", "Error Rank"]],
-                use_container_width=True,
+                export_q_df,
+                width="stretch",
                 hide_index=True
+            )
+            render_download_button(
+                df=export_q_df,
+                filename="module4_machine_quality_summary.csv",
+                label="📥 Export Machine Quality Summary (CSV)",
+                key="download_mod4_quality",
+                help_text="Download machine-level defect rates, error rates, arithmetic complements, and rankings as CSV."
             )
 
     st.divider()
@@ -499,25 +518,39 @@ def render_quality_efficiency(df: pd.DataFrame, kpis: Dict[str, Any]) -> None:
                 barmode="stack",
             )
             fig_ct.update_layout(
-                margin=dict(l=40, r=20, t=40, b=40),
+                margin=dict(l=40, r=20, t=30, b=40),
                 height=320,
                 legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
             )
-            st.plotly_chart(fig_ct, use_container_width=True)
+            st.plotly_chart(fig_ct, width="stretch")
+
+            display_ct_cols = [
+                "Mode", "Total", "Low Count", "Low (%)",
+                "Med Count", "Med (%)", "High Count", "High (%)"
+            ]
+            export_ct_df = contingency_df.rename(columns={
+                "Operation_Mode": "Mode",
+                "Total_Count": "Total",
+                "Low_Count": "Low Count",
+                "Low_Pct": "Low (%)",
+                "Medium_Count": "Med Count",
+                "Medium_Pct": "Med (%)",
+                "High_Count": "High Count",
+                "High_Pct": "High (%)",
+            })[display_ct_cols].copy().reset_index(drop=True)
+            export_ct_df.index.name = None
 
             st.dataframe(
-                contingency_df.rename(columns={
-                    "Operation_Mode": "Mode",
-                    "Total_Count": "Total",
-                    "Low_Count": "Low Count",
-                    "Low_Pct": "Low (%)",
-                    "Medium_Count": "Med Count",
-                    "Medium_Pct": "Med (%)",
-                    "High_Count": "High Count",
-                    "High_Pct": "High (%)",
-                }),
-                use_container_width=True,
+                export_ct_df,
+                width="stretch",
                 hide_index=True
+            )
+            render_download_button(
+                df=export_ct_df,
+                filename="module4_mode_efficiency_contingency.csv",
+                label="📥 Export Mode Efficiency Contingency (CSV)",
+                key="download_mod4_contingency",
+                help_text="Download operation mode by efficiency status contingency allocations as CSV."
             )
             st.caption(
                 "Chi-square contingency analysis (Cramér's V = 0.0042) confirms that Efficiency_Status is statistically "
@@ -548,7 +581,7 @@ def render_quality_efficiency(df: pd.DataFrame, kpis: Dict[str, Any]) -> None:
                 height=320,
                 legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
             )
-            st.plotly_chart(fig_mach_ct, use_container_width=True)
+            st.plotly_chart(fig_mach_ct, width="stretch")
             st.caption(
                 "Across all 50 units, the proportion of Low efficiency records ranges narrowly between 76.2% and 79.4%, "
                 "demonstrating that efficiency categorization is uniformly distributed across the machinery fleet."
@@ -579,7 +612,7 @@ def render_quality_efficiency(df: pd.DataFrame, kpis: Dict[str, Any]) -> None:
                     height=320,
                     showlegend=False,
                 )
-                st.plotly_chart(fig_eff_sec, use_container_width=True)
+                st.plotly_chart(fig_eff_sec, width="stretch")
 
                 # Tier SEC stats table
                 tier_sec_records = []
@@ -594,7 +627,7 @@ def render_quality_efficiency(df: pd.DataFrame, kpis: Dict[str, Any]) -> None:
                             "Std SEC (kWh/u)": f"{sub_sec.std(ddof=1):.6f}",
                             "P95 SEC (kWh/u)": f"{np.percentile(sub_sec, 95):.6f}",
                         })
-                st.dataframe(pd.DataFrame(tier_sec_records), use_container_width=True, hide_index=True)
+                st.dataframe(pd.DataFrame(tier_sec_records), width="stretch", hide_index=True)
                 st.caption(
                     "SEC distributions are virtually identical across Low (0.0293 kWh/u), Medium (0.0293 kWh/u), and High (0.0294 kWh/u) tiers. "
                     "This demonstrates that `Efficiency_Status` classification labels were not generated based on energy consumption per unit."
