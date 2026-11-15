@@ -27,7 +27,21 @@ import streamlit as st
 # Constants and Schema Specifications
 # ---------------------------------------------------------------------------
 
-EXPECTED_SHA256: str = "060052A2975034C1D424FDF50089E6D94A5DB736EB85F35CDA0E0B907FF988AF"
+# Canonical SHA-256 checksums for the manufacturing dataset
+# 1. Original Windows CRLF checkout (9,356,442 bytes)
+EXPECTED_SHA256_WINDOWS_CRLF: str = "060052A2975034C1D424FDF50089E6D94A5DB736EB85F35CDA0E0B907FF988AF"
+
+# 2. Normalized Linux / Git LF checkout (9,256,441 bytes, e.g. Streamlit Cloud)
+EXPECTED_SHA256_LINUX_LF: str = "0C59D3C93C94A9994CD3503FBD9E7A58697D7EEC5B0FA8CAFC4B9ECF5810C700"
+
+# Backward-compatibility alias
+EXPECTED_SHA256: str = EXPECTED_SHA256_WINDOWS_CRLF
+
+# Accepted canonical checksum set across platforms and checkout configurations
+VALID_DATASET_CHECKSUMS: Set[str] = {
+    EXPECTED_SHA256_WINDOWS_CRLF,
+    EXPECTED_SHA256_LINUX_LF,
+}
 
 EXPECTED_ROW_COUNT: int = 100000
 EXPECTED_MACHINE_COUNT: int = 50
@@ -175,19 +189,28 @@ def get_data_file_path(filename: str = "Thales_Group_Manufacturing.csv") -> Path
     )
 
 
-def verify_file_checksum(file_path: Union[str, Path], expected_sha256: str = EXPECTED_SHA256) -> str:
+def verify_file_checksum(
+    file_path: Union[str, Path],
+    expected_sha256: Optional[Union[str, Set[str], Tuple[str, ...], List[str]]] = None
+) -> str:
     """
     Compute and verify the SHA-256 cryptographic checksum of a file.
 
+    Supports dual-canonical checksum verification for cross-platform portability:
+    - Original Windows CRLF (060052A2... - 9,356,442 bytes)
+    - Normalized Linux/Git LF (0C59D3C9... - 9,256,441 bytes)
+
     Parameters:
         file_path: Path to the target file.
-        expected_sha256: Expected hexadecimal SHA-256 hash string.
+        expected_sha256: Expected hexadecimal SHA-256 hash string, or collection of acceptable
+                         hash strings. If None, validates against VALID_DATASET_CHECKSUMS.
 
     Returns:
         Calculated uppercase SHA-256 string if matching.
 
     Raises:
-        DataIntegrityError: If the computed checksum diverges from expected.
+        SourceFileNotFoundError: If the target file does not exist.
+        DataIntegrityError: If the computed checksum diverges from expected hash(es).
     """
     p = Path(file_path)
     if not p.is_file():
@@ -199,10 +222,27 @@ def verify_file_checksum(file_path: Union[str, Path], expected_sha256: str = EXP
             hasher.update(chunk)
     calculated = hasher.hexdigest().upper()
 
-    if expected_sha256 and calculated != expected_sha256.upper():
+    if expected_sha256 is None:
+        target_hashes = {h.upper() for h in VALID_DATASET_CHECKSUMS}
+    elif isinstance(expected_sha256, str):
+        target_hashes = {expected_sha256.upper()}
+    else:
+        target_hashes = {h.upper() for h in expected_sha256}
+
+    if calculated not in target_hashes:
+        if expected_sha256 is None or target_hashes == {h.upper() for h in VALID_DATASET_CHECKSUMS}:
+            expected_desc = (
+                f"Accepted canonical hashes: Windows CRLF ({EXPECTED_SHA256_WINDOWS_CRLF}) "
+                f"or Linux LF ({EXPECTED_SHA256_LINUX_LF})"
+            )
+        elif len(target_hashes) == 1:
+            expected_desc = f"Expected: {next(iter(target_hashes))}"
+        else:
+            expected_desc = f"Expected one of: {sorted(target_hashes)}"
+
         raise DataIntegrityError(
             f"Cryptographic checksum mismatch for '{p.name}'. "
-            f"Expected: {expected_sha256.upper()}, Calculated: {calculated}"
+            f"{expected_desc}, Calculated: {calculated}"
         )
     return calculated
 

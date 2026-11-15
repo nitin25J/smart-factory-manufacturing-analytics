@@ -22,6 +22,8 @@ Tests verify:
 17. Physical domain boundary enforcement (rejects Temperature < 0, Vibration < 0, Error Rate < 0 or > 100).
 18. Physical domain exact boundary values accepted.
 19. Empirical range drift reporting.
+20. Cross-platform checksum portability (Linux LF and Windows CRLF acceptance).
+21. Tampered checksum rejection with dual-hash diagnostic reporting.
 """
 
 from __future__ import annotations
@@ -39,7 +41,10 @@ from scripts.app.data_loader import (
     EXPECTED_COLUMNS,
     EXPECTED_ROW_COUNT,
     EXPECTED_SHA256,
+    EXPECTED_SHA256_LINUX_LF,
+    EXPECTED_SHA256_WINDOWS_CRLF,
     NUMERIC_COLUMNS,
+    VALID_DATASET_CHECKSUMS,
     VALID_EFFICIENCY_STATUSES,
     VALID_OPERATION_MODES,
     DataIntegrityError,
@@ -225,18 +230,30 @@ def test_14_record_preservation_and_timestamp_collisions(loaded_dataframe: pd.Da
 
 def test_15_dataset_integrity_and_sha256_checksum(valid_dataset_path: Path) -> None:
     """Verify that the raw CSV matches the exact immutable SHA-256 cryptographic hash."""
+    # 1. Default invocation verifies against canonical dataset hashes
     calculated_hash = verify_file_checksum(valid_dataset_path)
-    assert calculated_hash == EXPECTED_SHA256, (
-        f"Checksum mismatch! Expected: {EXPECTED_SHA256}, Got: {calculated_hash}"
+    assert calculated_hash in VALID_DATASET_CHECKSUMS, (
+        f"Checksum {calculated_hash} not found in valid canonical set {VALID_DATASET_CHECKSUMS}"
     )
+    # On the active local Windows workspace, verify exact CRLF hash
+    assert calculated_hash == EXPECTED_SHA256_WINDOWS_CRLF
+    assert calculated_hash == EXPECTED_SHA256
 
-    # Tampered fixture should fail verification
+    # 2. Explicit parameter matching Windows CRLF hash
+    explicit_hash = verify_file_checksum(valid_dataset_path, expected_sha256=EXPECTED_SHA256_WINDOWS_CRLF)
+    assert explicit_hash == EXPECTED_SHA256_WINDOWS_CRLF
+
+    # 3. Explicit set parameter matching canonical set
+    set_hash = verify_file_checksum(valid_dataset_path, expected_sha256=VALID_DATASET_CHECKSUMS)
+    assert set_hash in VALID_DATASET_CHECKSUMS
+
+    # 4. Tampered fixture should fail verification
     with tempfile.NamedTemporaryFile("w", delete=False, suffix=".csv") as tmp:
         tmp.write("tampered,data\n1,2\n")
         tmp_path = Path(tmp.name)
     try:
         with pytest.raises(DataIntegrityError, match="Cryptographic checksum mismatch"):
-            verify_file_checksum(tmp_path, expected_sha256=EXPECTED_SHA256)
+            verify_file_checksum(tmp_path)
     finally:
         tmp_path.unlink(missing_ok=True)
 
@@ -323,4 +340,79 @@ def test_19_empirical_range_drift_warning(minimal_valid_df: pd.DataFrame) -> Non
     result = validate_dataset(df_drift, expected_rows=None)
     assert result.is_valid is True
     assert any("Empirical drift in 'Temperature_C'" in w for w in result.warnings)
+
+
+def test_20_checksum_portability_linux_lf_acceptance(valid_dataset_path: Path) -> None:
+    """
+    Verify cross-platform portability: normalized Linux LF checksum is accepted.
+
+    Streamlit Community Cloud (and Linux Git checkouts) normalize CRLF to LF,
+    resulting in a 100,001-byte delta for 100,001 lines with SHA-256:
+    0C59D3C93C94A9994CD3503FBD9E7A58697D7EEC5B0FA8CAFC4B9ECF5810C700.
+    """
+    crlf_bytes = valid_dataset_path.read_bytes()
+    lf_bytes = crlf_bytes.replace(b"\r\n", b"\n")
+
+    # Byte delta must be exactly 100,001 bytes (1 header + 100,000 rows)
+    assert len(crlf_bytes) - len(lf_bytes) == 100001
+    assert len(lf_bytes) == 9256441
+
+    calculated_lf_hash = hashlib.sha256(lf_bytes).hexdigest().upper()
+    assert calculated_lf_hash == EXPECTED_SHA256_LINUX_LF
+
+    with tempfile.NamedTemporaryFile("wb", delete=False, suffix=".csv") as tmp:
+        tmp.write(lf_bytes)
+        tmp_path = Path(tmp.name)
+
+    try:
+        # Default verification must accept Linux LF file
+        result_default = verify_file_checksum(tmp_path)
+        assert result_default == EXPECTED_SHA256_LINUX_LF
+
+        # Explicit verification with EXPECTED_SHA256_LINUX_LF must succeed
+        result_explicit = verify_file_checksum(tmp_path, expected_sha256=EXPECTED_SHA256_LINUX_LF)
+        assert result_explicit == EXPECTED_SHA256_LINUX_LF
+
+        # Explicit verification with VALID_DATASET_CHECKSUMS set must succeed
+        result_set = verify_file_checksum(tmp_path, expected_sha256=VALID_DATASET_CHECKSUMS)
+        assert result_set == EXPECTED_SHA256_LINUX_LF
+    finally:
+        tmp_path.unlink(missing_ok=True)
+
+
+def test_21_checksum_rejection_and_diagnostic_reporting(valid_dataset_path: Path) -> None:
+    """
+    Verify strict rejection of invalid/tampered checksums and clean diagnostic messaging.
+    """
+    # 1. Tampered file with default validation must report both canonical hashes
+    with tempfile.NamedTemporaryFile("w", delete=False, suffix=".csv") as tmp:
+        tmp.write("corrupt,header\n0,0\n")
+        tmp_path = Path(tmp.name)
+
+    try:
+        with pytest.raises(DataIntegrityError) as exc_info:
+            verify_file_checksum(tmp_path)
+        err_msg = str(exc_info.value)
+        assert "Cryptographic checksum mismatch" in err_msg
+        assert EXPECTED_SHA256_WINDOWS_CRLF in err_msg
+        assert EXPECTED_SHA256_LINUX_LF in err_msg
+
+        # 2. Tampered file with specific expected hash
+        with pytest.raises(DataIntegrityError, match="Expected: 060052A2975034C1D424FDF50089E6D94A5DB736EB85F35CDA0E0B907FF988AF"):
+            verify_file_checksum(tmp_path, expected_sha256=EXPECTED_SHA256_WINDOWS_CRLF)
+
+        with pytest.raises(DataIntegrityError, match="Expected: 0C59D3C93C94A9994CD3503FBD9E7A58697D7EEC5B0FA8CAFC4B9ECF5810C700"):
+            verify_file_checksum(tmp_path, expected_sha256=EXPECTED_SHA256_LINUX_LF)
+
+    finally:
+        tmp_path.unlink(missing_ok=True)
+
+    # 3. Valid dataset against an arbitrary custom hash must fail
+    bogus_hash = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    with pytest.raises(DataIntegrityError, match=f"Expected: {bogus_hash}"):
+        verify_file_checksum(valid_dataset_path, expected_sha256=bogus_hash)
+
+    # 4. Non-existent file must raise SourceFileNotFoundError
+    with pytest.raises(SourceFileNotFoundError):
+        verify_file_checksum(Path("non_existent_file_xyz_123.csv"))
 

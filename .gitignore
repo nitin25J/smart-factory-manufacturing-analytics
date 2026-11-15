@@ -223,10 +223,12 @@ __marimo__/
 # Project-Specific Exclusions (Manufacturing Analytics System)
 # ===========================================================================
 
-# Raw Datasets (Specifically excluded to preserve legitimate audit CSV deliverables)
-data/raw/
-Thales_Group_Manufacturing.csv
-*/Thales_Group_Manufacturing.csv
+# Exclude loose root CSV copies to preserve canonical data/raw path
+/Thales_Group_Manufacturing.csv
+
+# Raw Datasets (Exclude all raw datasets except the verified deployment CSV)
+data/raw/*
+!data/raw/Thales_Group_Manufacturing.csv
 
 # VS Code IDE Settings (Keep settings.json)
 .vscode/*
