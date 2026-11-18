@@ -7,7 +7,7 @@ A Python and Streamlit-based manufacturing analytics system for machine health a
 
 * **Author:** Nitin Sharma
 * **Institution:** VIT Bhopal University
-* **Status:** Research Working Paper — Not Peer Reviewed
+* **Status:** Research Working Paper
 
 #### Manuscript & Compilation Materials
 * **Final Research Paper (PDF):** [reports/research/02_ieee_manuscript_draft.pdf](reports/research/02_ieee_manuscript_draft.pdf)
