@@ -16,4 +16,3 @@ A Python and Streamlit-based manufacturing analytics system for machine health a
 * **Bibliography (BibTeX):** [reports/research/02_ieee_references.bib](reports/research/02_ieee_references.bib)
 * **Overleaf Compilation Package (ZIP):** [build/research/IEEE_Manuscript_Overleaf.zip](build/research/IEEE_Manuscript_Overleaf.zip)
 
-> *Notice: This manuscript is shared strictly as a research working paper and does not represent an accepted or peer-reviewed journal publication.*
