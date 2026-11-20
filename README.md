@@ -74,3 +74,55 @@ The primary objectives of this project are:
 The broader objective is to establish an interpretable analytical foundation for future 6G-oriented smart manufacturing environments without claiming a physical 6G deployment.
 
 ---
+
+## System Architecture
+
+The system follows a modular architecture consisting of data ingestion, validation, KPI computation, core analytical processing, and interactive dashboard presentation.
+
+```mermaid
+flowchart TD
+    A["Manufacturing Telemetry Dataset<br/>CSV Input"]
+    
+    subgraph DATA["1. Data Access Layer"]
+        B["data_loader.py<br/>Data Ingestion"]
+        C["Schema Enforcement<br/>Missing Value and Range Validation"]
+        B --> C
+    end
+
+    subgraph ENGINE["2. Computation and Analytics Layer"]
+        D["kpi_engine.py<br/>Vectorized KPI Computation"]
+        E["analytics.py<br/>Statistical and Analytical Algorithms"]
+    end
+
+    subgraph PRESENTATION["3. Dashboard Presentation Layer"]
+        F["app.py<br/>Streamlit Dashboard Shell"]
+        G["Factory Overview<br/>factory_overview.py"]
+        H["Machine Health<br/>machine_health.py"]
+        I["Production & Energy<br/>production_energy.py"]
+        J["Quality & Efficiency<br/>quality_efficiency.py"]
+    end
+
+    subgraph OUTPUT["4. Shared UI and Output Components"]
+        K["components.py<br/>Shared UI Components"]
+        L["Interactive Visualizations<br/>and Sanitized CSV Exports"]
+    end
+
+    A --> B
+    C --> D
+    C --> E
+    D --> F
+    E --> F
+    F --> G
+    F --> H
+    F --> I
+    F --> J
+    G --> K
+    H --> K
+    I --> K
+    J --> K
+    K --> L
+```
+
+The architecture separates data access, computation, reusable analytical algorithms, and dashboard presentation to support modular development and maintainable manufacturing analytics workflows.
+
+---
