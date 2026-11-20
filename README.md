@@ -350,3 +350,56 @@ The dataset supports the following analytical domains:
 The dataset is included in the project repository as a manufacturing telemetry CSV. Its original provenance and collection methodology have not been independently established. Therefore, the filename alone should not be interpreted as verification that the data was directly collected or supplied by Thales Group.
 
 The observed data characteristics also warrant caution when interpreting the dataset as real-world factory telemetry. Results presented by the dashboard should be understood as analyses of the provided dataset, not as independently validated measurements of an operational manufacturing facility.
+
+
+## Technology Stack
+
+The project is implemented using Python-based data processing and analytical libraries, with Streamlit providing the interactive dashboard interface.
+
+### Technology Overview
+
+```mermaid
+flowchart TB
+
+    A["Smart Factory Analytics Application"]
+
+    A --> B["Application Layer"]
+    A --> C["Data Processing Layer"]
+    A --> D["Analytics and Visualization"]
+    A --> E["Data and Testing"]
+
+    B --> B1["Python"]
+    B --> B2["Streamlit"]
+
+    C --> C1["Pandas"]
+    C --> C2["NumPy"]
+
+    D --> D1["SciPy"]
+    D --> D2["Plotly"]
+
+    E --> E1["CSV Dataset"]
+    E --> E2["Pytest"]
+
+    classDef main fill:#0B3562,stroke:#3B82F6,color:#FFFFFF,stroke-width:2px;
+    classDef tech fill:#102F52,stroke:#60A5FA,color:#FFFFFF,stroke-width:1.5px;
+
+    class A main;
+    class B,C,D,E,B1,B2,C1,C2,D1,D2,E1,E2 tech;
+
+    linkStyle default stroke:#3B82F6,stroke-width:2px;
+```
+
+### Technology Reference
+
+| Technology | Purpose |
+|---|---|
+| Python | Core programming language |
+| Streamlit | Interactive web application and dashboard |
+| Pandas | Dataset loading, manipulation, and filtering |
+| NumPy | Numerical and vectorized computations |
+| SciPy | Statistical and scientific computations |
+| Plotly | Interactive data visualizations |
+| CSV | Manufacturing telemetry data storage |
+| Pytest | Automated testing |
+
+**Dependency Management:** Project dependencies are specified in `requirements.txt`.
