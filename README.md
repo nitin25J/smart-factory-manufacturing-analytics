@@ -1,18 +1,22 @@
-# smart-factory-manufacturing-analytics
-A Python and Streamlit-based manufacturing analytics system for machine health assessment, production performance analysis, quality diagnostics, efficiency monitoring, and KPI-driven operational insights in 6G-enabled smart factory environments..
+# Manufacturing Process Health and Operational Efficiency Analysis
 
-## Research Paper
+### A Data-Driven Framework for 6G-Oriented Smart Factories
 
-### Manufacturing Process Health and Operational Efficiency Analysis: A Data-Driven Framework for 6G-Oriented Smart Factories
+An integrated manufacturing analytics platform for monitoring machine health, production performance, energy consumption, network quality of service, and operational efficiency through an interactive data-driven dashboard.
 
-* **Author:** Nitin Sharma
-* **Institution:** VIT Bhopal University
-* **Status:** Research Working Paper
+<p align="center">
+  <a href="https://smart-factory-manufacturing-analytics-tjambjpnvyme6cdqysgqvp.streamlit.app/">
+    <img src="https://img.shields.io/badge/Live_Dashboard-Visit_App-brightgreen?style=for-the-badge&logo=streamlit" alt="Live Dashboard">
+  </a>
+  <a href="https://github.com/nitin25J/smart-factory-manufacturing-analytics">
+    <img src="https://img.shields.io/badge/GitHub-Repository-black?style=for-the-badge&logo=github" alt="GitHub Repository">
+  </a>
+</p>
 
-#### Manuscript & Compilation Materials
-* **Final Research Paper (PDF):** [reports/research/02_ieee_manuscript_draft.pdf](reports/research/02_ieee_manuscript_draft.pdf)
-* **LaTeX Source:** [reports/research/02_ieee_manuscript_draft.tex](reports/research/02_ieee_manuscript_draft.tex)
-* **Markdown Manuscript:** [reports/research/02_ieee_manuscript_draft.md](reports/research/02_ieee_manuscript_draft.md)
-* **Bibliography (BibTeX):** [reports/research/02_ieee_references.bib](reports/research/02_ieee_references.bib)
-* **Overleaf Compilation Package (ZIP):** [build/research/IEEE_Manuscript_Overleaf.zip](build/research/IEEE_Manuscript_Overleaf.zip)
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-Analytics-blue?style=flat&logo=python" alt="Python">
+  <img src="https://img.shields.io/badge/Streamlit-Dashboard-red?style=flat&logo=streamlit" alt="Streamlit">
+  <img src="https://img.shields.io/badge/Research-Working_Paper-orange?style=flat" alt="Research Working Paper">
+</p>
 
+---
