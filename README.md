@@ -222,3 +222,76 @@ Examines production performance across machines and operating modes. It includes
 Examines quality-related indicators, including defects and errors, alongside operational efficiency measurements. It supports comparisons across machines and operating conditions to identify areas requiring further investigation.
 
 The four modules are accessible through the Streamlit application. Each module uses the filtered manufacturing dataset and relevant KPI results, with shared analytical functions and reusable interface components.
+
+## Analytical Methodology
+
+The analytical methodology combines descriptive statistics, KPI computation, distribution analysis, and multivariate screening to evaluate manufacturing process performance.
+
+### Analytical Workflow
+
+```mermaid
+flowchart TB
+
+    A["Filtered Manufacturing Dataset"]
+
+    B["Data Preparation<br/>Validated Records · Parsed Timestamps<br/>Machine and Operation Mode Filters"]
+
+    C["KPI Computation<br/>Machine Health · Production<br/>Quality · Network · Energy"]
+
+    D{"Analytical Processing"}
+
+    M["Machine Health Analysis<br/>Temperature · Vibration<br/>Mahalanobis Distance Screening"]
+
+    N["Network Reliability Analysis<br/>Latency · Packet Loss<br/>ECDF · Latency Dispersion"]
+
+    P["Production and Energy Analysis<br/>Production Speed · Power<br/>Specific Energy Consumption"]
+
+    Q["Quality and Efficiency Analysis<br/>Defect and Error Indicators<br/>Operational Comparisons"]
+
+    R["Analytical Results<br/>Statistical Summaries · KPI Indicators<br/>Distribution Patterns · Unusual Observations"]
+
+    S["Interactive Dashboard Presentation<br/>Charts · Tables · KPI Cards · CSV Exports"]
+
+    A --> B --> C --> D
+
+    D --> M
+    D --> N
+    D --> P
+    D --> Q
+
+    M --> R
+    N --> R
+    P --> R
+    Q --> R
+
+    R --> S
+
+    classDef input fill:#0B3562,stroke:#3B82F6,color:#FFFFFF,stroke-width:2px;
+    classDef process fill:#102F52,stroke:#3B82F6,color:#FFFFFF,stroke-width:1.5px;
+    classDef analysis fill:#123B60,stroke:#60A5FA,color:#FFFFFF,stroke-width:1.5px;
+    classDef decision fill:#164E8A,stroke:#60A5FA,color:#FFFFFF,stroke-width:2px;
+    classDef output fill:#164E8A,stroke:#60A5FA,color:#FFFFFF,stroke-width:2.5px;
+
+    class A input;
+    class B,C process;
+    class D decision;
+    class M,N,P,Q analysis;
+    class R,S output;
+
+    linkStyle default stroke:#3B82F6,stroke-width:2px;
+```
+
+### Key Analytical Techniques
+
+| Technique | Application |
+|---|---|
+| Descriptive Statistics | Summarizing machine, production, and operational measurements |
+| KPI Computation | Evaluating five manufacturing performance domains |
+| Empirical Cumulative Distribution Function (ECDF) | Examining network latency distributions |
+| Mahalanobis Distance | Screening observations with unusual multivariate characteristics |
+| Comparative Analysis | Evaluating performance across machines and operating modes |
+| Energy Efficiency Analysis | Examining power consumption and specific energy consumption |
+
+**Implementation:** `kpi_engine.py` handles KPI computation, while `analytics.py` provides reusable statistical and analytical functions.
+
+**Interpretation:** The methodology supports descriptive performance assessment and anomaly screening. Mahalanobis screening identifies statistically unusual observations; it does not independently establish equipment failure or predict future breakdowns. Latency dispersion is treated as a statistical proxy, not a direct measurement of network packet jitter.
