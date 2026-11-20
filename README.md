@@ -77,52 +77,126 @@ The broader objective is to establish an interpretable analytical foundation for
 
 ## System Architecture
 
-The system follows a modular architecture consisting of data ingestion, validation, KPI computation, core analytical processing, and interactive dashboard presentation.
+The Manufacturing Process Health and Operational Efficiency Analysis platform follows a modular, multi-layer architecture designed to integrate manufacturing telemetry processing, KPI computation, statistical analytics, and interactive dashboard visualization.
+
+The architecture separates data ingestion, validation, application-level processing, analytical computation, and presentation into dedicated components. A centralized Streamlit application manages global filters, processes the selected telemetry records, calculates domain-specific KPIs, and dispatches the results to four specialized analytical modules.
+
+### Architecture Diagram
 
 ```mermaid
-flowchart TD
+flowchart TB
+
     A["Manufacturing Telemetry Dataset<br/>CSV Input"]
-    
-    subgraph DATA["1. Data Access Layer"]
+
+    subgraph L1["01 — DATA ACCESS LAYER"]
         B["data_loader.py<br/>Data Ingestion"]
-        C["Schema Enforcement<br/>Missing Value and Range Validation"]
+        C["Data Validation and Integrity<br/>Schema Enforcement<br/>Missing Value Checks<br/>Date and Time Parsing<br/>Cached Data Loading"]
         B --> C
     end
 
-    subgraph ENGINE["2. Computation and Analytics Layer"]
-        D["kpi_engine.py<br/>Vectorized KPI Computation"]
-        E["analytics.py<br/>Statistical and Analytical Algorithms"]
+    subgraph L2["02 — APPLICATION AND COMPUTATION LAYER"]
+        D["app.py<br/>Central Streamlit Application"]
+        E["Global Filters<br/>Machine ID<br/>Operation Mode<br/>Date Range"]
+        F["Filtered Manufacturing Data"]
+        G["kpi_engine.py<br/>Vectorized KPI Computation"]
+        H["Five-Domain KPI Results<br/>Machine Health<br/>Production Throughput<br/>Product Quality<br/>Network Reliability<br/>Energy Efficiency"]
+
+        D --> E
+        E --> F
+        F --> G
+        G --> H
     end
 
-    subgraph PRESENTATION["3. Dashboard Presentation Layer"]
-        F["app.py<br/>Streamlit Dashboard Shell"]
-        G["Factory Overview<br/>factory_overview.py"]
-        H["Machine Health<br/>machine_health.py"]
-        I["Production & Energy<br/>production_energy.py"]
-        J["Quality & Efficiency<br/>quality_efficiency.py"]
+    subgraph L3["03 — ANALYTICAL DASHBOARD MODULES"]
+        M1["Module 1<br/>Factory Health and Network Overview"]
+        M2["Module 2<br/>Machine Health and Condition Monitoring"]
+        M3["Module 3<br/>Production Throughput and Energy Monitoring"]
+        M4["Module 4<br/>Quality Assurance and Efficiency Diagnostics"]
     end
 
-    subgraph OUTPUT["4. Shared UI and Output Components"]
-        K["components.py<br/>Shared UI Components"]
-        L["Interactive Visualizations<br/>and Sanitized CSV Exports"]
+    subgraph L4["04 — SHARED ANALYTICS AND UI COMPONENTS"]
+        I["analytics.py<br/>ECDF Profiling<br/>Latency Dispersion Analysis<br/>Mahalanobis Screening<br/>Machine and Production Summaries"]
+        J["components.py<br/>KPI Cards and Section Headers<br/>Global Filters<br/>Error and Empty States<br/>Sanitized CSV Exports"]
+    end
+
+    subgraph L5["05 — PRESENTATION AND OUTPUT"]
+        K["Interactive Streamlit Dashboard"]
+        O["Analytical Visualizations<br/>KPI Metrics<br/>Statistical Tables<br/>CSV Downloads"]
+        K --> O
     end
 
     A --> B
     C --> D
-    C --> E
-    D --> F
-    E --> F
-    F --> G
-    F --> H
-    F --> I
-    F --> J
-    G --> K
-    H --> K
-    I --> K
-    J --> K
-    K --> L
+
+    F --> M1
+    F --> M2
+    F --> M3
+    F --> M4
+
+    H --> M1
+    H --> M2
+    H --> M3
+    H --> M4
+
+    D -->|"Module Navigation and Dispatch"| M1
+    D -->|"Module Navigation and Dispatch"| M2
+    D -->|"Module Navigation and Dispatch"| M3
+    D -->|"Module Navigation and Dispatch"| M4
+
+    M1 -.->|"Uses"| I
+    M2 -.->|"Uses"| I
+    M3 -.->|"Uses"| I
+    M4 -.->|"Uses"| I
+
+    M1 -.->|"Uses"| J
+    M2 -.->|"Uses"| J
+    M3 -.->|"Uses"| J
+    M4 -.->|"Uses"| J
+
+    J -.->|"Shared Presentation Utilities"| K
+    M1 --> K
+    M2 --> K
+    M3 --> K
+    M4 --> K
+
+    classDef source fill:#e0f2fe,stroke:#0284c7,color:#0c4a6e,stroke-width:2px
+    classDef data fill:#eff6ff,stroke:#2563eb,color:#1e3a8a
+    classDef core fill:#f3e8ff,stroke:#9333ea,color:#581c87
+    classDef modules fill:#ecfdf5,stroke:#059669,color:#064e3b,stroke-width:1.5px
+    classDef services fill:#fff7ed,stroke:#ea580c,color:#7c2d12
+    classDef output fill:#fef9c3,stroke:#ca8a04,color:#713f12,stroke-width:2px
+
+    class A source
+    class B,C data
+    class D,E,F,G,H core
+    class M1,M2,M3,M4 modules
+    class I,J services
+    class K,O output
 ```
 
-The architecture separates data access, computation, reusable analytical algorithms, and dashboard presentation to support modular development and maintainable manufacturing analytics workflows.
+### Architecture Components
 
----
+| Layer | Component | Responsibility |
+|---|---|---|
+| Data Access | `data_loader.py` | Dataset ingestion, schema validation, integrity checks, and caching. |
+| Application | `app.py` | Application initialization, global filtering, KPI orchestration, and module navigation. |
+| KPI Engine | `kpi_engine.py` | Vectorized computation across five manufacturing KPI domains. |
+| Analytics | `analytics.py` | Reusable statistical and analytical functions, including ECDF and Mahalanobis distance calculations. |
+| Dashboard Modules | `modules/` | Four specialized interfaces for manufacturing diagnostics. |
+| Shared UI | `components.py` | Reusable UI elements, filtering utilities, error handling, and CSV exports. |
+
+### Analytical Dashboard Modules
+
+1. **Factory Health and Network Overview:** Evaluates network latency, packet loss, empirical distributions, and within-machine latency dispersion.
+2. **Machine Health and Condition Monitoring:** Examines temperature, vibration, predictive maintenance scores, and Mahalanobis distance-based geometric screening.
+3. **Production Throughput and Energy Monitoring:** Analyzes production speed, operational modes, power consumption, and Specific Energy Consumption (SEC).
+4. **Quality Assurance and Efficiency Diagnostics:** Evaluates defect rates, process error rates, efficiency-status distributions, and contingency relationships.
+
+### Architecture Design Principles
+
+- **Modularity:** Separates data processing, computation, analytics, and visualization responsibilities.
+- **Reusability:** Uses common analytical functions and shared UI components across dashboard modules.
+- **Vectorized Processing:** Leverages Pandas and NumPy for efficient processing of large telemetry datasets.
+- **Interactive Analysis:** Provides synchronized global filters and specialized analytical views.
+- **Data Integrity:** Enforces schema validation, data-quality checks, and sanitized data exports.
+- **Interpretability:** Preserves individual KPI definitions and physical units instead of combining unrelated metrics into opaque composite scores.
