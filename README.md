@@ -81,97 +81,41 @@ The application follows a modular, layered architecture. Manufacturing telemetry
 
 ### Architecture Diagram
 
-```mermaid
-%%{init: {"theme":"base","themeVariables":{"fontFamily":"Arial, sans-serif","fontSize":"14px","primaryColor":"#DBEAFE","primaryTextColor":"#1E3A8A","primaryBorderColor":"#2563EB","lineColor":"#3B82F6","secondaryColor":"#EFF6FF","tertiaryColor":"#F8FBFF","clusterBkg":"#F0F7FF","clusterBorder":"#60A5FA"}}}%%
+### Architecture Diagram
 
+```mermaid
 flowchart LR
 
-    subgraph DATA["01 | DATA ACCESS LAYER"]
-        direction TB
-        A["Manufacturing Telemetry Dataset<br/>CSV Input"]
-        B["data_loader.py<br/>Data Ingestion"]
-        C["Data Validation & Integrity<br/>Schema Enforcement<br/>Missing-Value Checks<br/>Date and Time Parsing<br/>Cached Data Loading"]
-        A --> B --> C
-    end
+    A["Manufacturing Telemetry Dataset<br/>CSV Input"]
+    B["data_loader.py<br/>Data Ingestion & Caching"]
+    C["Data Validation & Integrity<br/>Schema Enforcement<br/>Missing-Value Checks<br/>Date-Time Parsing"]
+    D["app.py<br/>Central Streamlit Application"]
+    E["Global Filters<br/>Machine ID · Operation Mode<br/>Date Range"]
+    F["Filtered Manufacturing Data"]
+    G["kpi_engine.py<br/>Vectorized KPI Computation"]
+    H["Five KPI Domains<br/>Machine Health · Production<br/>Quality · Network · Energy"]
+    I["Dashboard Navigation<br/>Selected Module Dispatch"]
+    J["Analytical Dashboard Modules<br/><br/>Factory Health & Network Overview<br/>Machine Health & Condition Monitoring<br/>Production Throughput & Energy Monitoring<br/>Quality Assurance & Efficiency Diagnostics"]
+    K["Shared Utilities<br/>analytics.py — Statistical Analysis<br/>components.py — UI Components & CSV Export"]
+    L["Interactive Streamlit Dashboard<br/>KPI Metrics · Visualizations<br/>Analytical Tables · CSV Downloads"]
 
-    subgraph APP["02 | APPLICATION & FILTERING LAYER"]
-        direction TB
-        D["app.py<br/>Central Streamlit Application"]
-        E["Global Filters<br/>Machine ID · Operation Mode · Date Range"]
-        F["Filtered Manufacturing Data"]
-        D --> E --> F
-    end
-
-    subgraph KPI["03 | KPI COMPUTATION LAYER"]
-        direction TB
-        G["kpi_engine.py<br/>Vectorized KPI Computation"]
-        H["KPI Results<br/>Machine Health · Production Throughput<br/>Product Quality · Network Reliability<br/>Energy Efficiency"]
-        G --> H
-    end
-
-    subgraph ROUTING["04 | DASHBOARD MODULES"]
-        direction TB
-        I{"Dashboard Navigation<br/>Select Active Module"}
-        M1["Factory Health &<br/>Network Overview"]
-        M2["Machine Health &<br/>Condition Monitoring"]
-        M3["Production Throughput &<br/>Energy Monitoring"]
-        M4["Quality Assurance &<br/>Efficiency Diagnostics"]
-        I --> M1
-        I --> M2
-        I --> M3
-        I --> M4
-    end
-
-    subgraph SHARED["05 | SHARED ANALYTICS & UI UTILITIES"]
-        direction TB
-        J["analytics.py<br/>ECDF Analysis · Mahalanobis Screening<br/>Machine & Production Summaries"]
-        K["components.py<br/>Reusable UI Components<br/>KPI Cards · Filters · Error States<br/>CSV Export & Display Elements"]
-    end
-
-    subgraph OUTPUT["06 | PRESENTATION LAYER"]
-        direction TB
-        L["Interactive Streamlit Dashboard<br/>KPI Metrics · Charts · Tables<br/>Analytical Insights · CSV Downloads"]
-    end
-
-    C --> D
-    F --> G
-    F --> I
-    H --> I
-
-    M1 -.-> J
-    M1 -.-> K
-    M2 -.-> J
-    M2 -.-> K
-    M3 -.-> J
-    M3 -.-> K
-    M4 -.-> J
-    M4 -.-> K
-
-    J --> L
-    K --> L
+    A --> B --> C --> D --> E --> F --> G --> H --> I --> J --> K --> L
 
     classDef source fill:#DBEAFE,stroke:#2563EB,color:#1E3A8A,stroke-width:2px;
     classDef process fill:#EFF6FF,stroke:#3B82F6,color:#1E40AF,stroke-width:1.5px;
-    classDef compute fill:#E0F2FE,stroke:#0284C7,color:#0C4A6E,stroke-width:1.5px;
-    classDef decision fill:#DBEAFE,stroke:#1D4ED8,color:#1E3A8A,stroke-width:2px;
-    classDef module fill:#E8F1FF,stroke:#2563EB,color:#1E40AF,stroke-width:1.5px;
-    classDef utility fill:#F0F9FF,stroke:#0EA5E9,color:#075985,stroke-width:1.5px;
-    classDef output fill:#BFDBFE,stroke:#1D4ED8,color:#1E3A8A,stroke-width:2px;
+    classDef compute fill:#E0F2FE,stroke:#0284C7,color:#075985,stroke-width:1.5px;
+    classDef module fill:#DCEBFF,stroke:#2563EB,color:#1E3A8A,stroke-width:2px;
+    classDef utility fill:#E0F2FE,stroke:#0284C7,color:#075985,stroke-width:1.5px;
+    classDef output fill:#BFDBFE,stroke:#1D4ED8,color:#1E3A8A,stroke-width:2.5px;
 
     class A source;
     class B,C,D,E,F process;
     class G,H compute;
-    class I decision;
-    class M1,M2,M3,M4 module;
-    class J,K utility;
+    class I,J module;
+    class K utility;
     class L output;
 
-    style DATA fill:#F8FBFF,stroke:#60A5FA,stroke-width:1.5px,color:#1E3A8A
-    style APP fill:#F8FBFF,stroke:#60A5FA,stroke-width:1.5px,color:#1E3A8A
-    style KPI fill:#F0F7FF,stroke:#60A5FA,stroke-width:1.5px,color:#1E3A8A
-    style ROUTING fill:#F8FBFF,stroke:#60A5FA,stroke-width:1.5px,color:#1E3A8A
-    style SHARED fill:#F0F7FF,stroke:#60A5FA,stroke-width:1.5px,color:#1E3A8A
-    style OUTPUT fill:#EFF6FF,stroke:#2563EB,stroke-width:2px,color:#1E3A8A
+    linkStyle default stroke:#2563EB,stroke-width:2px;
 ```
 
 ### Architecture Execution Sequence
