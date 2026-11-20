@@ -38,3 +38,22 @@ The system processes manufacturing telemetry and provides analytical capabilitie
 The project establishes a data-driven analytical framework for **6G-oriented smart manufacturing**, with an emphasis on interpretable metrics, statistical analysis, and transparent evaluation of data limitations.
 
 ---
+
+
+## Problem Statement
+
+Traditional manufacturing analytics often operate across separate functional domains, creating fragmented visibility into overall production operations.
+
+Key challenges include:
+
+1. **Industrial Network QoS:** Network latency and packet loss are monitored separately from manufacturing performance.
+2. **Machine Health Monitoring:** Temperature and vibration measurements are analyzed independently, limiting integrated equipment assessment.
+3. **Production Monitoring:** Machine operating states and production throughput are tracked without sufficient cross-domain context.
+4. **Energy Management:** Power consumption and energy efficiency are evaluated separately from production output.
+5. **Quality Assurance:** Defect rates and process errors are assessed independently of machine, network, and energy conditions.
+
+This fragmented approach makes it difficult to interpret relationships between operational dimensions within a unified analytical environment.
+
+The project addresses this challenge by developing an integrated manufacturing analytics platform that brings these five domains into a common dashboard while preserving their individual metrics, units, and analytical meaning.
+
+---
