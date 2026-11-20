@@ -295,3 +295,58 @@ flowchart TB
 **Implementation:** `kpi_engine.py` handles KPI computation, while `analytics.py` provides reusable statistical and analytical functions.
 
 **Interpretation:** The methodology supports descriptive performance assessment and anomaly screening. Mahalanobis screening identifies statistically unusual observations; it does not independently establish equipment failure or predict future breakdowns. Latency dispersion is treated as a statistical proxy, not a direct measurement of network packet jitter.
+
+## Dataset Overview
+
+The project uses a manufacturing telemetry dataset stored in CSV format. The dataset contains machine-level and operational measurements used for manufacturing health, production, quality, network, and energy-efficiency analysis.
+
+### Dataset at a Glance
+
+```mermaid
+flowchart TB
+
+    A["Manufacturing Telemetry Dataset<br/>Thales_Group_Manufacturing.csv"]
+
+    A --> B["100,000<br/>Records"]
+    A --> C["14<br/>Columns"]
+    A --> D["50<br/>Machines"]
+    A --> E["Jan 01 – Mar 10, 2025<br/>69 Calendar Dates"]
+
+    A --> F["Data Quality Audit<br/>No Missing Values Reported"]
+
+    classDef dataset fill:#0B3562,stroke:#3B82F6,color:#FFFFFF,stroke-width:2px;
+    classDef metric fill:#102F52,stroke:#60A5FA,color:#FFFFFF,stroke-width:1.5px;
+
+    class A dataset;
+    class B,C,D,E,F metric;
+
+    linkStyle default stroke:#3B82F6,stroke-width:2px;
+```
+
+### Dataset Summary
+
+| Attribute | Description |
+|---|---|
+| File | `Thales_Group_Manufacturing.csv` |
+| Format | CSV |
+| Total Records | 100,000 |
+| Total Columns | 14 |
+| Machine Coverage | 50 machines |
+| Recorded Period | January 1 – March 10, 2025 |
+| Missing Values | None reported in the dataset audit |
+
+### Data Utilization
+
+The dataset supports the following analytical domains:
+
+- Machine health and condition monitoring
+- Production throughput and operational performance
+- Product quality assessment
+- Network reliability analysis
+- Energy consumption and efficiency analysis
+
+### Data Provenance and Limitations
+
+The dataset is included in the project repository as a manufacturing telemetry CSV. Its original provenance and collection methodology have not been independently established. Therefore, the filename alone should not be interpreted as verification that the data was directly collected or supplied by Thales Group.
+
+The observed data characteristics also warrant caution when interpreting the dataset as real-world factory telemetry. Results presented by the dashboard should be understood as analyses of the provided dataset, not as independently validated measurements of an operational manufacturing facility.
