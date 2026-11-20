@@ -20,3 +20,21 @@ An integrated manufacturing analytics platform for monitoring machine health, pr
 </p>
 
 ---
+
+## Project Overview
+
+Manufacturing environments generate large volumes of operational data across machines, production processes, energy consumption, product quality, and industrial network systems. Analyzing these dimensions independently can make it difficult to develop a unified understanding of manufacturing operations.
+
+**Manufacturing Process Health and Operational Efficiency Analysis** is a Python-based, Streamlit-powered analytics platform designed to bring these operational dimensions together through an integrated dashboard.
+
+The system processes manufacturing telemetry and provides analytical capabilities across five key domains:
+
+- **Machine Health:** Temperature, vibration, and multivariate condition screening.
+- **Production Performance:** Production speed, operational modes, and throughput analysis.
+- **Energy Efficiency:** Power consumption and Specific Energy Consumption (SEC).
+- **Network Quality of Service:** Network latency, packet loss, and empirical distribution profiling.
+- **Manufacturing Quality:** Defect rates, process error rates, and efficiency-status analysis.
+
+The project establishes a data-driven analytical framework for **6G-oriented smart manufacturing**, with an emphasis on interpretable metrics, statistical analysis, and transparent evaluation of data limitations.
+
+---
