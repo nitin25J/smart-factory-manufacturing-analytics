@@ -403,3 +403,65 @@ flowchart TB
 | Pytest | Automated testing |
 
 **Dependency Management:** Project dependencies are specified in `requirements.txt`.
+
+## Project Directory Structure
+
+The repository is organized into separate directories for application logic, manufacturing data, analytical modules, reports, and automated tests.
+
+```text
+smart-factory-manufacturing-analytics/
+│
+├── app.py
+├── requirements.txt
+├── README.md
+├── .gitignore
+│
+├── data/
+│   └── raw/
+│       └── Thales_Group_Manufacturing.csv
+│
+├── scripts/
+│   └── app/
+│       ├── data_loader.py
+│       ├── kpi_engine.py
+│       ├── analytics.py
+│       ├── components.py
+│       │
+│       └── modules/
+│           ├── factory_overview.py
+│           ├── machine_health.py
+│           ├── production_energy.py
+│           └── quality_efficiency.py
+│
+├── reports/
+│   ├── audit/
+│   │   └── figures/
+│   │
+│   └── research/
+│       ├── 02_ieee_manuscript_draft.pdf
+│       ├── 02_ieee_manuscript_draft.tex
+│       └── 02_ieee_references.bib
+│
+├── build/
+│   └── research/
+│       └── IEEE_Manuscript_Overleaf.zip
+│
+└── tests/
+    └── test files
+```
+
+### Directory Responsibilities
+
+| Directory / File | Purpose |
+|---|---|
+| `app.py` | Main Streamlit application entry point |
+| `data/raw/` | Source manufacturing telemetry dataset |
+| `scripts/app/` | Data processing, KPI computation, analytics, and UI utilities |
+| `scripts/app/modules/` | Four independent analytical dashboard modules |
+| `reports/audit/` | Dataset audit reports and supporting figures |
+| `reports/research/` | Research manuscript and bibliography |
+| `build/research/` | Packaged research manuscript files |
+| `tests/` | Automated project tests |
+| `requirements.txt` | Python dependency definitions |
+
+
