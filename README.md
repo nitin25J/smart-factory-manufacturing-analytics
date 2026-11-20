@@ -57,3 +57,20 @@ This fragmented approach makes it difficult to interpret relationships between o
 The project addresses this challenge by developing an integrated manufacturing analytics platform that brings these five domains into a common dashboard while preserving their individual metrics, units, and analytical meaning.
 
 ---
+
+## Project Objectives
+
+The primary objectives of this project are:
+
+1. **Unified Manufacturing Analytics:** Integrate machine health, production, energy, network QoS, and quality metrics into a common analytical platform.
+2. **Machine Condition Assessment:** Analyze temperature and vibration measurements using statistical and multivariate techniques.
+3. **Production Performance Analysis:** Examine production speed, machine operating modes, and throughput patterns.
+4. **Energy Efficiency Evaluation:** Calculate and analyze Specific Energy Consumption (SEC), including its mathematical expectation decomposition.
+5. **Network QoS Profiling:** Evaluate network latency and packet loss using non-parametric empirical distribution analysis.
+6. **Quality and Efficiency Monitoring:** Analyze defect rates, process error rates, and supplied efficiency categories.
+7. **Interactive Visualization:** Provide an accessible dashboard with synchronized filters, analytical visualizations, and sanitized CSV exports.
+8. **Scientific Data Validation:** Audit telemetry characteristics, identify data-quality limitations, and distinguish descriptive analysis from validated physical or predictive claims.
+
+The broader objective is to establish an interpretable analytical foundation for future 6G-oriented smart manufacturing environments without claiming a physical 6G deployment.
+
+---
