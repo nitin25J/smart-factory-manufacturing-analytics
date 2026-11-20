@@ -186,3 +186,39 @@ flowchart TB
 | `modules/` | Four independent analytical dashboard modules |
 
 The architecture separates data ingestion, application logic, KPI computation, analytical processing, and presentation. This modular design supports code reusability, maintainability, and independent development of analytical dashboard modules.
+
+## Core Features and Analytical Modules
+
+The project provides an interactive analytics dashboard for examining manufacturing process health, operational performance, telemetry reliability, and production efficiency.
+
+### Core Features
+
+- **Interactive Data Filtering:** Filter manufacturing records by machine ID, operation mode, and date range.
+- **Manufacturing KPI Computation:** Calculate performance indicators across machine health, production throughput, product quality, network reliability, and energy efficiency.
+- **Machine Health Monitoring:** Examine machine temperature, vibration, and performance-related indicators.
+- **Production and Energy Analysis:** Analyze production speed, power consumption, and specific energy consumption across operating conditions.
+- **Quality Assessment:** Examine defect-related indicators and quality performance across machines and operating modes.
+- **Network Reliability Analysis:** Explore network latency and packet-loss distributions using statistical summaries and empirical cumulative distribution functions (ECDF).
+- **Statistical Anomaly Screening:** Apply Mahalanobis distance-based screening to identify observations with unusual multivariate characteristics.
+- **Interactive Visualizations:** Explore analytical results through interactive charts, KPI cards, and summary tables.
+- **Data Export:** Download supported analytical results and filtered data as CSV files.
+
+### Analytical Dashboard Modules
+
+#### 1. Factory Health and Network Overview
+
+Provides a consolidated view of manufacturing process health and telemetry network performance. It combines high-level KPI indicators with machine and network summaries to help users examine overall operational conditions.
+
+#### 2. Machine Health and Condition Monitoring
+
+Focuses on machine-level condition indicators, including temperature, vibration, and related health measurements. It supports machine-wise comparisons and statistical screening of unusual observations.
+
+#### 3. Production Throughput and Energy Monitoring
+
+Examines production performance across machines and operating modes. It includes production speed, power consumption, and specific energy consumption analysis to support comparisons of operational and energy performance.
+
+#### 4. Quality Assurance and Efficiency Diagnostics
+
+Examines quality-related indicators, including defects and errors, alongside operational efficiency measurements. It supports comparisons across machines and operating conditions to identify areas requiring further investigation.
+
+The four modules are accessible through the Streamlit application. Each module uses the filtered manufacturing dataset and relevant KPI results, with shared analytical functions and reusable interface components.
