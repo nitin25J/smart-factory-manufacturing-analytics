@@ -83,40 +83,87 @@ The application follows a modular, layered architecture. Manufacturing telemetry
 
 ### Architecture Diagram
 
+
 ```mermaid
-flowchart LR
+%%{init: {"theme":"base","themeVariables":{"background":"#0B0F14","primaryColor":"#0B3562","primaryTextColor":"#FFFFFF","primaryBorderColor":"#3B82F6","lineColor":"#3B82F6","secondaryColor":"#102D4D","tertiaryColor":"#0B3562","clusterBkg":"#101A29","clusterBorder":"#2563EB","edgeLabelBackground":"#0B0F14","fontFamily":"Arial"}}}%%
+
+flowchart TB
 
     A["Manufacturing Telemetry Dataset<br/>CSV Input"]
-    B["data_loader.py<br/>Data Ingestion & Caching"]
-    C["Data Validation & Integrity<br/>Schema Enforcement<br/>Missing-Value Checks<br/>Date-Time Parsing"]
-    D["app.py<br/>Central Streamlit Application"]
-    E["Global Filters<br/>Machine ID · Operation Mode<br/>Date Range"]
-    F["Filtered Manufacturing Data"]
-    G["kpi_engine.py<br/>Vectorized KPI Computation"]
-    H["Five KPI Domains<br/>Machine Health · Production<br/>Quality · Network · Energy"]
-    I["Dashboard Navigation<br/>Selected Module Dispatch"]
-    J["Analytical Dashboard Modules<br/><br/>Factory Health & Network Overview<br/>Machine Health & Condition Monitoring<br/>Production Throughput & Energy Monitoring<br/>Quality Assurance & Efficiency Diagnostics"]
-    K["Shared Utilities<br/>analytics.py — Statistical Analysis<br/>components.py — UI Components & CSV Export"]
-    L["Interactive Streamlit Dashboard<br/>KPI Metrics · Visualizations<br/>Analytical Tables · CSV Downloads"]
+    B["data_loader.py<br/>Data Ingestion and Cached Loading"]
+    C["Data Validation and Integrity<br/>Schema Enforcement<br/>Missing-Value Checks<br/>Date-Time Parsing"]
+    D[("Validated Manufacturing Dataset")]
 
-    A --> B --> C --> D --> E --> F --> G --> H --> I --> J --> K --> L
+    E["app.py<br/>Central Streamlit Application"]
+    F["Global Filter Controls<br/>Machine ID · Operation Mode<br/>Date Range"]
+    G["Filtered Manufacturing Data"]
 
-    classDef source fill:#DBEAFE,stroke:#2563EB,color:#1E3A8A,stroke-width:2px;
-    classDef process fill:#EFF6FF,stroke:#3B82F6,color:#1E40AF,stroke-width:1.5px;
-    classDef compute fill:#E0F2FE,stroke:#0284C7,color:#075985,stroke-width:1.5px;
-    classDef module fill:#DCEBFF,stroke:#2563EB,color:#1E3A8A,stroke-width:2px;
-    classDef utility fill:#E0F2FE,stroke:#0284C7,color:#075985,stroke-width:1.5px;
-    classDef output fill:#BFDBFE,stroke:#1D4ED8,color:#1E3A8A,stroke-width:2.5px;
+    H["kpi_engine.py<br/>Vectorized KPI Computation"]
+    I["Five KPI Domains<br/>Machine Health · Production Throughput<br/>Product Quality · Network Reliability<br/>Energy Efficiency"]
 
-    class A source;
-    class B,C,D,E,F process;
-    class G,H compute;
-    class I,J module;
-    class K utility;
-    class L output;
+    J{"Dashboard Module Selection"}
 
-    linkStyle default stroke:#2563EB,stroke-width:2px;
+    subgraph MODULES["ANALYTICAL DASHBOARD MODULES"]
+        direction LR
+        M1["Factory Health and<br/>Network Overview"]
+        M2["Machine Health and<br/>Condition Monitoring"]
+        M3["Production Throughput and<br/>Energy Monitoring"]
+        M4["Quality Assurance and<br/>Efficiency Diagnostics"]
+    end
+
+    subgraph UTILITIES["SHARED ANALYTICAL AND UI UTILITIES"]
+        direction LR
+        N["analytics.py<br/>Statistical Analysis<br/>ECDF · Mahalanobis Screening<br/>Machine and Production Summaries"]
+        O["components.py<br/>Reusable UI Components<br/>KPI Cards · Section Headers<br/>Error States · CSV Export"]
+    end
+
+    P["Interactive Streamlit Dashboard<br/>KPI Metrics · Visualizations<br/>Analytical Tables · CSV Downloads"]
+
+    A --> B --> C --> D --> E
+    E --> F --> G
+    G --> H --> I
+
+    G --> J
+    I --> J
+
+    J --> M1
+    J --> M2
+    J --> M3
+    J --> M4
+
+    M1 -.-> N
+    M2 -.-> N
+    M3 -.-> N
+    M4 -.-> N
+
+    M1 -.-> O
+    M2 -.-> O
+    M3 -.-> O
+    M4 -.-> O
+
+    N --> P
+    O --> P
+
+    classDef main fill:#0B3562,stroke:#3B82F6,color:#FFFFFF,stroke-width:2px;
+    classDef database fill:#0B3562,stroke:#60A5FA,color:#FFFFFF,stroke-width:2px;
+    classDef decision fill:#123F70,stroke:#60A5FA,color:#FFFFFF,stroke-width:2px;
+    classDef module fill:#102F52,stroke:#3B82F6,color:#FFFFFF,stroke-width:2px;
+    classDef utility fill:#123B60,stroke:#60A5FA,color:#FFFFFF,stroke-width:2px;
+    classDef output fill:#164E8A,stroke:#60A5FA,color:#FFFFFF,stroke-width:2.5px;
+
+    class A,B,C,E,F,G,H,I main;
+    class D database;
+    class J decision;
+    class M1,M2,M3,M4 module;
+    class N,O utility;
+    class P output;
+
+    style MODULES fill:#101A29,stroke:#2563EB,stroke-width:2px,color:#FFFFFF
+    style UTILITIES fill:#101A29,stroke:#2563EB,stroke-width:2px,color:#FFFFFF
+
+    linkStyle default stroke:#3B82F6,stroke-width:2px;
 ```
+
 
 ### Architecture Execution Sequence
 
