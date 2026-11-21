@@ -464,4 +464,30 @@ smart-factory-manufacturing-analytics/
 | `tests/` | Automated project tests |
 | `requirements.txt` | Python dependency definitions |
 
+## Testing and Validation
+
+The project includes a dedicated testing structure to support verification of application functionality and analytical components.
+
+### Validation Areas
+
+| Area | Validation Focus |
+|---|---|
+| Data Loading | Dataset accessibility and loading |
+| Data Processing | Data filtering and transformation |
+| KPI Computation | Correctness of calculated performance indicators |
+| Analytical Functions | Statistical computation and analytical outputs |
+| Dashboard Modules | Integration of analytical results with dashboard components |
+
+### Automated Testing
+
+The repository includes a `tests/` directory for automated test cases.
+
+Run the test suite using:
+
+```bash
+pytest
+```
+
+Testing helps identify implementation issues and improves the reliability and maintainability of the analytical application.
+
 
