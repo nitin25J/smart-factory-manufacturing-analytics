@@ -491,3 +491,21 @@ pytest
 Testing helps identify implementation issues and improves the reliability and maintainability of the analytical application.
 
 
+## Research Manuscript
+
+The project is accompanied by a research manuscript titled:
+
+**Manufacturing Process Health and Operational Efficiency Analysis: A Data-Driven Framework for 6G-Oriented Smart Factories**
+
+The manuscript presents the analytical framework, methodology, experimental observations, and findings associated with the project.
+
+### Research Resources
+
+| Resource | Link |
+|---|---|
+| Research Manuscript (PDF) | [View PDF](reports/research/02_ieee_manuscript_draft.pdf) |
+| LaTeX Source | [View Source](reports/research/02_ieee_manuscript_draft.tex) |
+| References | [View Bibliography](reports/research/02_ieee_references.bib) |
+| Overleaf Project Package | [View ZIP](build/research/IEEE_Manuscript_Overleaf.zip) |
+
+> **Publication Status:** This manuscript is available as a research working paper. It has not yet undergone peer review or formal journal publication.
