@@ -509,3 +509,55 @@ The manuscript presents the analytical framework, methodology, experimental obse
 | Overleaf Project Package | [View ZIP](build/research/IEEE_Manuscript_Overleaf.zip) |
 
 > **Publication Status:** This manuscript is available as a research working paper. It has not yet undergone peer review or formal journal publication.
+
+
+
+## Limitations and Future Scope
+
+### Current Limitations
+
+The current implementation has the following limitations:
+
+- **Dataset Provenance:** The original source and collection methodology of the manufacturing dataset have not been independently verified.
+- **Dataset Dependency:** The dashboard currently relies on the provided CSV dataset rather than a live industrial data stream.
+- **Network Representation:** Network reliability analysis uses the available latency and packet-loss measurements; it does not represent a deployed 5G or 6G communication infrastructure.
+- **Statistical Screening:** Mahalanobis distance identifies unusual multivariate observations but does not confirm equipment failure or predict future breakdowns.
+- **Predictive Capability:** The current application primarily provides descriptive and diagnostic analytics rather than a validated predictive maintenance system.
+- **Deployment Environment:** The public dashboard is hosted on Streamlit Community Cloud and may hibernate during periods of inactivity.
+
+### Future Scope
+
+The framework can be extended through the following development directions:
+
+```mermaid id="fut6g"
+flowchart LR
+
+    A["Current Analytics Framework"]
+
+    A --> B["Industrial Data Integration<br/>Real-Time Sensor and IIoT Data"]
+
+    A --> C["Advanced Predictive Analytics<br/>Validated Machine Learning Models"]
+
+    A --> D["6G-Oriented Network Evaluation<br/>Real Network KPIs and QoS Analysis"]
+
+    A --> E["Scalable Deployment<br/>Continuous Data Processing<br/>Production-Ready Infrastructure"]
+
+    B --> F["Future Smart Factory<br/>Intelligence Framework"]
+    C --> F
+    D --> F
+    E --> F
+
+    classDef current fill:#0B3562,stroke:#3B82F6,color:#FFFFFF,stroke-width:2px;
+    classDef future fill:#102F52,stroke:#60A5FA,color:#FFFFFF,stroke-width:1.5px;
+    classDef target fill:#164E8A,stroke:#60A5FA,color:#FFFFFF,stroke-width:2.5px;
+
+    class A current;
+    class B,C,D,E future;
+    class F target;
+
+    linkStyle default stroke:#3B82F6,stroke-width:2px;
+```
+
+Potential extensions include integrating verified industrial sensor datasets, developing and validating predictive maintenance models, evaluating real network quality-of-service measurements, and implementing scalable continuous data-processing infrastructure.
+
+These directions represent proposed future work and are not claimed as existing capabilities of the current application.
