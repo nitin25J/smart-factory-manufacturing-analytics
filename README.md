@@ -560,4 +560,26 @@ flowchart LR
 
 Potential extensions include integrating verified industrial sensor datasets, developing and validating predictive maintenance models, evaluating real network quality-of-service measurements, and implementing scalable continuous data-processing infrastructure.
 
+
+## Author and Contact
+
+**Nitin Sharma**  
+Undergraduate Student  
+Department of Computer Science and Engineering (AI & ML)  
+VIT Bhopal University  
+Kothrikalan, Sehore – 466114  
+Madhya Pradesh, India
+
+**Email:** nitin.25bai11122@vitbhopal.ac.in
+
+**GitHub:** [nitin25J](https://github.com/nitin25J)
+
+**Project Repository:** [Smart Factory Manufacturing Analytics](https://github.com/nitin25J/smart-factory-manufacturing-analytics)
+
+**Live Application:** [Open Streamlit Dashboard](https://smart-factory-manufacturing-analytics-tjambjpnvyme6cdqysgqvp.streamlit.app/)
+
+---
+
+*Developed as an academic and research-oriented project exploring data-driven manufacturing process health and operational efficiency analysis for 6G-oriented smart factories.*
+
 These directions represent proposed future work and are not claimed as existing capabilities of the current application.
