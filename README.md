@@ -1,6 +1,6 @@
 # Manufacturing Process Health and Operational Efficiency Analysis
 
-### A Data-Driven Framework for 6G-Oriented Smart Factories
+### A Data-Driven Framework for 6G-Oriented Smart Factories.
 
 An integrated manufacturing analytics platform for monitoring machine health, production performance, energy consumption, network quality of service, and operational efficiency through an interactive data-driven dashboard.
 
