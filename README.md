@@ -79,7 +79,6 @@ The broader objective is to establish an interpretable analytical foundation for
 
 The application follows a modular, layered architecture. Manufacturing telemetry data is ingested and validated before entering the Streamlit application. Users can filter the dataset, generate KPI results, and navigate between four analytical dashboard modules. The selected module uses shared analytical and UI utilities to render the results.
 
-### Architecture Diagram
 
 ### Architecture Diagram
 
